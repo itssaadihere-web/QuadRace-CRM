@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nextLeadsStore, parseCsvLeads, calculateLeadScore, resolveLinkedInProfilePicture, formatPhoneNumber, Lead, LeadActivityLog } from '@/lib/leads-store';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       leadsToProcess = parseCsvLeads(csv_content, orgId);
     } else if (Array.isArray(rawLeads)) {
       leadsToProcess = rawLeads.map((item: any, idx: number) => {
-        const id = item.prospect_id ? `lead-${item.prospect_id.substring(0, 12)}` : (item.id || `lead-${uuidv4().substring(0, 10)}`);
+        const id = item.prospect_id ? `lead-${item.prospect_id.substring(0, 12)}` : (item.id || `lead-${crypto.randomUUID().substring(0, 10)}`);
         
         const phoneFields = Object.keys(item).filter(k => 
           k.toLowerCase().includes('phone') || k.toLowerCase().includes('contact_number') || k.toLowerCase().includes('mobile') || k.toLowerCase().includes('cell')

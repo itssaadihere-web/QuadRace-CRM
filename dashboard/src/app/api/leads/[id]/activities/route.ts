@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nextLeadsStore, LeadActivityLog } from '@/lib/leads-store';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   nextLeadsStore.init();
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       return NextResponse.json({ success: false, error: 'Lead not found' }, { status: 404 });
     }
 
-    const logId = uuidv4();
+    const logId = crypto.randomUUID();
     const activity: LeadActivityLog = {
       id: logId,
       lead_id: leadId,

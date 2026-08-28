@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nextLeadsStore, calculateLeadScore, Lead, LeadActivityLog } from '@/lib/leads-store';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   nextLeadsStore.init();
@@ -48,7 +48,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         if (oldVal !== newVal) {
           (lead as any)[key] = updates[key];
 
-          const actId = uuidv4();
+          const actId = crypto.randomUUID();
           const isStatus = key === 'status';
           const changeActivity: LeadActivityLog = {
             id: actId,
