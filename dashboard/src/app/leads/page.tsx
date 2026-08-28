@@ -104,7 +104,7 @@ const PIPELINE_STAGES = [
 
 // Auto Phone Number Formatter
 // Automatically formats numbers like +13475568353 -> +1 (347) 556-8353
-export function formatPhoneNumber(val: string): string {
+function formatPhoneNumber(val: string): string {
   if (!val) return '';
   const trimmed = val.trim();
   const hasPlus = trimmed.startsWith('+');
