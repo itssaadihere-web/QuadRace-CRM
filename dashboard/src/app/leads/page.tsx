@@ -348,6 +348,39 @@ export default function LeadsPage() {
     }
   };
 
+  // Universal WhatsApp Chat Launcher
+  // Automatically opens native WhatsApp App on mobile devices, or WhatsApp Web / Desktop on PC & Mac
+  const openDirectWhatsApp = (phoneOrLead: string | Lead, customMessage: string = '') => {
+    let targetPhone = '';
+    let leadObj: Lead | null = null;
+
+    if (typeof phoneOrLead === 'object' && phoneOrLead !== null) {
+      leadObj = phoneOrLead;
+      targetPhone = leadObj.contact_number
+        ? leadObj.contact_number.split(/[,;\n]+/)[0].trim()
+        : '';
+    } else {
+      targetPhone = phoneOrLead;
+    }
+
+    const cleanDigits = targetPhone.replace(/[^0-9]/g, '');
+
+    if (!cleanDigits) {
+      showToast('Please add a contact phone number first to start a WhatsApp chat.');
+      if (leadObj) handleOpenLead(leadObj);
+      return;
+    }
+
+    const encodedMsg = encodeURIComponent(
+      customMessage || `Hi ${leadObj ? leadObj.first_name || leadObj.full_name : ''}! Reaching out from Quadrace CRM.`
+    );
+
+    // Official WhatsApp Universal link: device-aware redirection
+    const universalUrl = `https://api.whatsapp.com/send?phone=${cleanDigits}&text=${encodedMsg}`;
+    window.open(universalUrl, '_blank', 'noopener,noreferrer');
+    showToast(`Redirecting to WhatsApp chat for ${cleanDigits}...`);
+  };
+
   // Trigger Solomon AI pitch generator
   const handleGenerateAIPitch = async (channel: 'email' | 'whatsapp' | 'linkedin') => {
     if (!selectedLead) return;
@@ -463,7 +496,7 @@ export default function LeadsPage() {
         showToast('WhatsApp logged! Opening WhatsApp chat...');
         const cleanPhone = commModal.lead.contact_number.replace(/[^0-9]/g, '');
         if (cleanPhone) {
-          window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+          window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(whatsappMsg)}`, '_blank', 'noopener,noreferrer');
         }
         setCommModal({ isOpen: false, type: 'whatsapp', lead: null });
         setWhatsappMsg('');
@@ -892,6 +925,13 @@ export default function LeadsPage() {
                                   >
                                     {copiedId === `ph-${lead.id}-${idx}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
                                   </button>
+                                  <button
+                                    onClick={() => openDirectWhatsApp(cleanPh)}
+                                    className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0.5 rounded transition"
+                                    title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
+                                  >
+                                    <MessageSquare className="w-3 h-3" />
+                                  </button>
                                 </div>
                               );
                             })}
@@ -939,9 +979,9 @@ export default function LeadsPage() {
 
                       {/* 5. Location */}
                       <td className="py-3 px-4 text-slate-600">
-                        <div className="flex items-center gap-1 text-[11px] capitalize">
-                          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                          <span>{[lead.city, lead.region_name, lead.country_name].filter(Boolean).join(', ') || 'Global'}</span>
+                        <div className="flex items-center gap-1 truncate max-w-[150px]">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate">{lead.city ? `${lead.city}, ${lead.country_name}` : lead.country_name || 'Global'}</span>
                         </div>
                       </td>
 
@@ -996,14 +1036,18 @@ export default function LeadsPage() {
                             <Mail className="w-3.5 h-3.5" />
                           </button>
 
-                          {/* WhatsApp Button */}
+                          {/* WhatsApp Chat Button */}
                           <button
                             onClick={() => {
-                              setCommModal({ isOpen: true, type: 'whatsapp', lead });
-                              handleGenerateAIPitch('whatsapp');
+                              if (lead.contact_number) {
+                                openDirectWhatsApp(lead);
+                              } else {
+                                setCommModal({ isOpen: true, type: 'whatsapp', lead });
+                                handleGenerateAIPitch('whatsapp');
+                              }
                             }}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition"
-                            title="WhatsApp Chat & Log"
+                            className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition"
+                            title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
                           </button>
@@ -1207,17 +1251,21 @@ export default function LeadsPage() {
                                     handleGenerateAIPitch('email');
                                   }}
                                   className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition border border-slate-100"
-                                  title="Draft / Send Email"
+                            title="Draft / Send Email"
                                 >
                                   <Mail className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => {
-                                    setCommModal({ isOpen: true, type: 'whatsapp', lead });
-                                    handleGenerateAIPitch('whatsapp');
+                                    if (lead.contact_number) {
+                                      openDirectWhatsApp(lead);
+                                    } else {
+                                      setCommModal({ isOpen: true, type: 'whatsapp', lead });
+                                      handleGenerateAIPitch('whatsapp');
+                                    }
                                   }}
-                                  className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 transition border border-slate-100"
-                                  title="WhatsApp Chat"
+                                  className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition border border-emerald-100"
+                                  title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
                                 >
                                   <MessageSquare className="w-3.5 h-3.5" />
                                 </button>
@@ -1463,6 +1511,15 @@ export default function LeadsPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                {selectedLead.contact_number && (
+                  <button
+                    onClick={() => openDirectWhatsApp(selectedLead)}
+                    className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition"
+                    title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" /> WhatsApp Chat <ExternalLink className="w-2.5 h-2.5" />
+                  </button>
+                )}
                 {selectedLead.linkedin_url && (
                   <a
                     href={selectedLead.linkedin_url.startsWith('http') ? selectedLead.linkedin_url : `https://${selectedLead.linkedin_url}`}
@@ -1578,6 +1635,16 @@ export default function LeadsPage() {
                               placeholder={idx === 0 ? "e.g. +17038640815 (Primary)" : "e.g. +1 (555) 019-2831 (Alt)"}
                               className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
                             />
+                            {phone.trim() && (
+                              <button
+                                type="button"
+                                onClick={() => openDirectWhatsApp(phone)}
+                                className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-bold flex items-center gap-1 shrink-0 shadow-2xs transition"
+                                title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
+                              >
+                                <MessageSquare className="w-3.5 h-3.5" /> Chat
+                              </button>
+                            )}
                             {phoneList.length > 1 && (
                               <button
                                 type="button"
