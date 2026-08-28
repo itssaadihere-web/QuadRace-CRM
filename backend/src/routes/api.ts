@@ -499,6 +499,21 @@ apiRouter.post('/leads/import', (req: Request, res: Response) => {
   } else if (Array.isArray(rawLeads)) {
     leadsToProcess = rawLeads.map((item: any, idx: number) => {
       const id = item.prospect_id ? `lead-${item.prospect_id.substring(0, 12)}` : (item.id || `lead-${uuidv4().substring(0, 10)}`);
+      
+      // Collect all possible phone fields from raw item
+      const phoneFields = Object.keys(item).filter(k => 
+        k.toLowerCase().includes('phone') || k.toLowerCase().includes('contact_number') || k.toLowerCase().includes('mobile') || k.toLowerCase().includes('cell')
+      );
+      const rawPhones = phoneFields.map(k => String(item[k] || '')).flatMap(p => p.split(/[,;\n]+/)).map(s => s.trim()).filter(Boolean);
+      const contactNumber = Array.from(new Set(rawPhones)).join(', ');
+
+      // Collect all possible email fields from raw item
+      const emailFields = Object.keys(item).filter(k => 
+        k.toLowerCase().includes('email') && !k.toLowerCase().includes('linkedin')
+      );
+      const rawEmails = emailFields.map(k => String(item[k] || '')).flatMap(e => e.split(/[,;\n]+/)).map(s => s.trim()).filter(Boolean);
+      const emailStr = Array.from(new Set(rawEmails)).join(', ');
+
       const lead: Lead = {
         id,
         org_id: orgId,
@@ -508,8 +523,8 @@ apiRouter.post('/leads/import', (req: Request, res: Response) => {
         first_name: item.first_name || item.prospect_first_name || '',
         last_name: item.last_name || item.prospect_last_name || '',
         full_name: item.full_name || item.prospect_full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'Unknown Prospect',
-        email: item.email || '',
-        contact_number: item.contact_number || '',
+        email: emailStr,
+        contact_number: contactNumber,
         country_name: item.country_name || item.prospect_country_name || '',
         region_name: item.region_name || item.prospect_region_name || '',
         city: item.city || item.prospect_city || '',
@@ -599,6 +614,26 @@ apiRouter.post('/leads/import', (req: Request, res: Response) => {
         if (newLead.company_website && !existingMatch.company_website) {
           existingMatch.company_website = newLead.company_website;
           fieldsChanged.push('company_website');
+        }
+        if (newLead.contact_number) {
+          const existingPhones = existingMatch.contact_number ? existingMatch.contact_number.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean) : [];
+          const incomingPhones = newLead.contact_number.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+          const mergedPhones = Array.from(new Set([...existingPhones, ...incomingPhones]));
+          const mergedPhoneStr = mergedPhones.join(', ');
+          if (mergedPhoneStr !== existingMatch.contact_number) {
+            existingMatch.contact_number = mergedPhoneStr;
+            fieldsChanged.push('contact_number');
+          }
+        }
+        if (newLead.email) {
+          const existingEmails = existingMatch.email ? existingMatch.email.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean) : [];
+          const incomingEmails = newLead.email.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean);
+          const mergedEmails = Array.from(new Set([...existingEmails, ...incomingEmails]));
+          const mergedEmailStr = mergedEmails.join(', ');
+          if (mergedEmailStr !== existingMatch.email) {
+            existingMatch.email = mergedEmailStr;
+            fieldsChanged.push('email');
+          }
         }
         if (newLead.skills && newLead.skills.length > 0 && existingMatch.skills.length === 0) {
           existingMatch.skills = newLead.skills;

@@ -509,6 +509,28 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
     const avatarUrl = explicitAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&rounded=true&size=128`;
     const createdAt = getVal('created_at') || new Date().toISOString();
 
+    // Extract all phone numbers from any matching phone/contact column
+    const phoneCols = Object.keys(headerMap).filter(k => 
+      k.includes('phone') || k.includes('contact_number') || k.includes('mobile') || k.includes('cell')
+    );
+    const collectedPhones = phoneCols
+      .map(k => getVal(k))
+      .flatMap(v => v.split(/[,;\n]+/))
+      .map(v => v.trim())
+      .filter(Boolean);
+    const contactNumber = Array.from(new Set(collectedPhones)).join(', ');
+
+    // Extract all emails from any matching email column
+    const emailCols = Object.keys(headerMap).filter(k => 
+      k.includes('email') && !k.includes('linkedin')
+    );
+    const collectedEmails = emailCols
+      .map(k => getVal(k))
+      .flatMap(v => v.split(/[,;\n]+/))
+      .map(v => v.trim())
+      .filter(Boolean);
+    const emailStr = Array.from(new Set(collectedEmails)).join(', ');
+
     const id = prospectId ? `lead-${prospectId.substring(0, 12)}` : `lead-${uuidv4().substring(0, 10)}`;
 
     const lead: Lead = {
@@ -520,8 +542,8 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
       first_name: firstName,
       last_name: lastName,
       full_name: fullName || 'Unknown Prospect',
-      email: '', // Initialized blank for manual entry
-      contact_number: '', // Initialized blank for manual entry
+      email: emailStr,
+      contact_number: contactNumber,
       country_name: countryName,
       region_name: regionName,
       city: city,
