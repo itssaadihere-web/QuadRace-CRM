@@ -1,0 +1,247 @@
+// Prisma schema for Quadrace CRM & Solomon AI (Multi-Tenant + pgvector)
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+enum PlanTier {
+  free
+  starter
+  growth
+  plus
+}
+
+enum UserRole {
+  owner
+  admin
+  agent
+}
+
+enum SourceType {
+  url
+  pdf
+  csv
+  faq
+}
+
+enum Channel {
+  web_widget
+  whatsapp
+  instagram
+  email
+}
+
+enum ConversationStatus {
+  ai_handled
+  pending_transfer
+  human_active
+  closed
+}
+
+enum SenderType {
+  visitor
+  solomon_ai
+  human_agent
+}
+
+enum EcommProvider {
+  shopify
+  woocommerce
+}
+
+model Organization {
+  id                String              @id @default(uuid())
+  name              String
+  tenant_slug       String              @unique
+  custom_domain     String?
+  plan_tier         PlanTier            @default(free)
+  billing_cycle     String              @default("monthly") // monthly | annual
+  solomon_guidance  String?             @db.Text
+  primary_color     String              @default("#4F46E5")
+  greeting_message  String              @default("Hi there! How can Solomon AI help you today?")
+  created_at        DateTime            @default(now())
+
+  users             User[]
+  knowledge_bases   KnowledgeBase[]
+  conversations     Conversation[]
+  ecomm_integrations EcommIntegration[]
+  unanswered_gaps   UnansweredGap[]
+  leads             Lead[]
+  lead_activities   LeadActivity[]
+
+  @@map("organizations")
+}
+
+model User {
+  id            String       @id @default(uuid())
+  org_id        String
+  email         String       @unique
+  password_hash String
+  role          UserRole     @default(agent)
+  push_token    String?
+  status        String       @default("active")
+  created_at    DateTime     @default(now())
+
+  organization  Organization @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  assigned_conversations Conversation[]
+
+  @@map("users")
+}
+
+model KnowledgeBase {
+  id            String                                 @id @default(uuid())
+  org_id        String
+  source_type   SourceType                             @default(url)
+  source_url    String?
+  vector_status String                                 @default("ready") // pending | processing | ready | error
+  content_chunk String                                 @db.Text
+  embedding     Unsupported("vector(1536)")?
+  created_at    DateTime                               @default(now())
+
+  organization  Organization                           @relation(fields: [org_id], references: [id], onDelete: Cascade)
+
+  @@map("knowledge_bases")
+}
+
+model Conversation {
+  id                String             @id @default(uuid())
+  org_id            String
+  visitor_id        String
+  channel           Channel            @default(web_widget)
+  assigned_agent_id String?
+  status            ConversationStatus @default(ai_handled)
+  last_message_at   DateTime           @default(now())
+  created_at        DateTime           @default(now())
+
+  organization     Organization       @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  assigned_agent   User?              @relation(fields: [assigned_agent_id], references: [id])
+  messages         Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id              String      @id @default(uuid())
+  conversation_id String
+  sender_type     SenderType
+  text            String      @db.Text
+  metadata        Json?       // Product cards, order payloads, button choices
+  created_at      DateTime    @default(now())
+
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model EcommIntegration {
+  id              String        @id @default(uuid())
+  org_id          String
+  provider        EcommProvider @default(shopify)
+  api_credentials String        @db.Text // Encrypted JSON string
+  store_url       String
+  created_at      DateTime      @default(now())
+
+  organization    Organization  @relation(fields: [org_id], references: [id], onDelete: Cascade)
+
+  @@map("ecomm_integrations")
+}
+
+model UnansweredGap {
+  id              String   @id @default(uuid())
+  org_id          String
+  customer_query  String   @db.Text
+  context         String?  @db.Text
+  frequency_count Int      @default(1)
+  resolved_status Boolean  @default(false)
+  created_at      DateTime @default(now())
+
+  organization    Organization @relation(fields: [org_id], references: [id], onDelete: Cascade)
+
+  @@map("unanswered_gaps")
+}
+
+enum LeadStatus {
+  new
+  contacted
+  meeting_scheduled
+  qualified
+  proposal
+  won
+  unqualified
+}
+
+enum ActivityType {
+  import
+  field_update
+  call
+  email
+  whatsapp
+  meeting
+  note
+  status_change
+}
+
+model Lead {
+  id                      String         @id @default(uuid())
+  org_id                  String
+  prospect_id             String?
+  business_id             String?
+  row_num                 Int?
+  first_name              String
+  last_name               String
+  full_name               String
+  email                   String         @default("")
+  contact_number          String         @default("")
+  country_name            String         @default("")
+  region_name             String         @default("")
+  city                    String         @default("")
+  linkedin_url            String         @default("")
+  experience              Json           @default("[]")
+  skills                  Json           @default("[]")
+  interests               Json           @default("[]")
+  company_name            String         @default("")
+  company_website         String         @default("")
+  company_linkedin        String         @default("")
+  job_department          String         @default("")
+  job_seniority_level     Json           @default("[]")
+  job_title               String         @default("")
+  status                  LeadStatus     @default(new)
+  score                   Int            @default(50)
+  notes                   String?        @db.Text
+  created_at              DateTime       @default(now())
+  updated_at              DateTime       @updated_at
+
+  organization            Organization   @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  activities              LeadActivity[]
+
+  @@map("leads")
+}
+
+model LeadActivity {
+  id               String       @id @default(uuid())
+  lead_id          String
+  org_id           String
+  type             ActivityType @default(note)
+  field_name       String?
+  old_value        String?      @db.Text
+  new_value        String?      @db.Text
+  summary          String       @db.Text
+  content          String?      @db.Text
+  outcome          String?
+  duration_seconds Int?
+  performed_by     String       @default("Agent")
+  created_at       DateTime     @default(now())
+
+  organization     Organization @relation(fields: [org_id], references: [id], onDelete: Cascade)
+  lead             Lead         @relation(fields: [lead_id], references: [id], onDelete: Cascade)
+
+  @@map("lead_activities")
+}
+

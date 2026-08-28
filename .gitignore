@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Expo / Mobile build outputs
+.expo/
+*.apk
+*.ipa
+
+# Environment files
+.env
+.env*.local
+
+# Logs
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
