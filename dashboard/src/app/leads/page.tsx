@@ -102,6 +102,49 @@ const PIPELINE_STAGES = [
   { id: 'unqualified', label: 'Unqualified', color: 'bg-slate-100 text-slate-600 border-slate-200' },
 ];
 
+// Auto Phone Number Formatter
+// Automatically formats numbers like +13475568353 -> +1 (347) 556-8353
+export function formatPhoneNumber(val: string): string {
+  if (!val) return '';
+  const trimmed = val.trim();
+  const hasPlus = trimmed.startsWith('+');
+  const digits = trimmed.replace(/\D/g, '');
+  
+  if (!digits) return hasPlus ? '+' : '';
+
+  // US/Canada 11 digits starting with 1 (e.g. +13475568353 -> +1 (347) 556-8353)
+  if (digits.length === 11 && digits.startsWith('1')) {
+    const area = digits.slice(1, 4);
+    const middle = digits.slice(4, 7);
+    const last = digits.slice(7, 11);
+    return `+1 (${area}) ${middle}-${last}`;
+  } 
+  // 10 digits without country code (e.g. 3475568353 -> +1 (347) 556-8353)
+  else if (digits.length === 10) {
+    const area = digits.slice(0, 3);
+    const middle = digits.slice(3, 6);
+    const last = digits.slice(6, 10);
+    return `+1 (${area}) ${middle}-${last}`;
+  } 
+  // Pakistan: e.g. 923475568353 or +923001234567 -> +92 (347) 556-8353
+  else if (digits.length === 12 && digits.startsWith('92')) {
+    return `+92 (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8, 12)}`;
+  } 
+  // UK: e.g. 447911123456 -> +44 7911 123456
+  else if (digits.length === 12 && digits.startsWith('44')) {
+    return `+44 ${digits.slice(2, 6)} ${digits.slice(6, 12)}`;
+  } 
+  // Generic international with plus
+  else if (hasPlus && digits.length >= 7) {
+    if (digits.length <= 10) {
+      return `+${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
+    }
+    return `+${digits.slice(0, 2)} (${digits.slice(2, 5)}) ${digits.slice(5, 8)}-${digits.slice(8)}`;
+  }
+
+  return trimmed;
+}
+
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -257,9 +300,9 @@ export default function LeadsPage() {
     setSelectedLead(lead);
     setEditForm({ ...lead });
 
-    // Parse multiple phone numbers and email addresses
+    // Parse and auto-format multiple phone numbers and email addresses
     const parsedPhones = lead.contact_number
-      ? lead.contact_number.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean)
+      ? lead.contact_number.split(/[,;\n]+/).map(s => formatPhoneNumber(s.trim())).filter(Boolean)
       : [];
     setPhoneList(parsedPhones.length > 0 ? parsedPhones : ['']);
 
@@ -313,10 +356,10 @@ export default function LeadsPage() {
     if (!selectedLead) return;
 
     setSavingEdit(true);
-    // Flatten and clean any comma-delimited strings in each entry
+    // Flatten, clean, and auto-format any phone numbers in each entry
     const consolidatedPhones = phoneList
       .flatMap(p => p.split(/[,;\n]+/))
-      .map(p => p.trim())
+      .map(p => formatPhoneNumber(p.trim()))
       .filter(Boolean)
       .join(', ');
 
@@ -1674,7 +1717,15 @@ export default function LeadsPage() {
                                   return next;
                                 });
                               }}
-                              placeholder={idx === 0 ? "e.g. +17038640815 (Primary)" : "e.g. +1 (555) 019-2831 (Alt)"}
+                              onBlur={(e) => {
+                                const formatted = formatPhoneNumber(e.target.value);
+                                setPhoneList(prev => {
+                                  const next = [...prev];
+                                  next[idx] = formatted;
+                                  return next;
+                                });
+                              }}
+                              placeholder={idx === 0 ? "e.g. +1 (703) 864-0815 (Primary)" : "e.g. +1 (347) 556-8353 (Alt)"}
                               className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
                             />
                             {phone.trim() && (

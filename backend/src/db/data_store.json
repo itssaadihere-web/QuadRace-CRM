@@ -32682,10 +32682,10 @@
         "visitor_id": "vis-1210",
         "visitor_name": "Anonymous Visitor",
         "channel": "web_widget",
-        "status": "ai_handled",
+        "status": "closed",
         "copilot_mode": true,
         "last_message_at": "2026-08-28T01:01:59.781Z",
-        "last_activity_at": "2026-08-28T01:01:59.781Z",
+        "last_activity_at": "2026-08-28T02:00:23.296Z",
         "created_at": "2026-08-28T01:01:59.781Z"
       }
     ]
@@ -32903,6 +32903,19 @@
         "text": "Welcome to Aura Fashion! I am Solomon AI, your personal shopping assistant. How can I help you today?",
         "created_at": "2026-08-28T01:01:59.781Z"
       }
+    ],
+    [
+      "cc881962-0ea5-4fbd-b843-5f3cf69be686",
+      {
+        "id": "cc881962-0ea5-4fbd-b843-5f3cf69be686",
+        "conversation_id": "conv-35cfbcc0",
+        "sender_type": "solomon_ai",
+        "text": "[System] Conversation marked as closed.",
+        "metadata": {
+          "is_system_notice": true
+        },
+        "created_at": "2026-08-28T02:00:23.297Z"
+      }
     ]
   ],
   "integrations": [],
@@ -32980,8 +32993,8 @@
         "first_name": "Carla",
         "last_name": "Briceno",
         "full_name": "Carla Briceno",
-        "email": "carlabriceno@gmail.com, cbriceno6@gmail.com",
-        "contact_number": "+1 (703) 864-0815",
+        "email": "carlabriceno@gmail.com, cbriceno6@gmail.com, carla.briceno@bixal.com",
+        "contact_number": "+1 (703) 864-0815, +13475568353",
         "country_name": "united states",
         "region_name": "virginia",
         "city": "oakton",
@@ -33094,7 +33107,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:06.885Z",
-        "updated_at": "2026-08-28T01:27:50.795Z"
+        "updated_at": "2026-08-28T02:03:33.706Z",
+        "avatar_url": "https://unavatar.io/linkedin/carla-briceno?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DCarla%2520Briceno%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33187,7 +33201,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/velan-t?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DVelan%2520T.%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33259,7 +33274,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/pablo-palafox?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DPablo%2520Palafox%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33340,7 +33356,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/saurabh-gawande?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSaurabh%2520Gawande%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33407,7 +33424,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/luis-paarup?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DLuis%2520Paarup%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33526,7 +33544,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/robert-edward-grant?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRobert%2520Edward%2520Grant%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33574,7 +33593,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/michael-mecca?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMichael%2520Mecca%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33650,7 +33670,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/erich-joachimsthaler-ph-d?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DErich%2520Joachimsthaler%2520Ph.d.%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33713,7 +33734,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/tracy-palandjian?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DTracy%2520Palandjian%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33762,7 +33784,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.946Z"
+        "updated_at": "2026-08-28T00:59:21.946Z",
+        "avatar_url": "https://unavatar.io/linkedin/sanjiv-bawa?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSanjiv%2520Bawa%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33849,7 +33872,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/vasudeva-anumukonda?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DVasudeva%2520Anumukonda%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33922,7 +33946,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/sanjay-verma?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSanjay%2520Verma%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -33980,7 +34005,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/william-havemeyer?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DWilliam%2520Havemeyer%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34058,7 +34084,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/javi-palafox?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJavi%2520Palafox%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34115,7 +34142,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jose-briceno?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJose%2520Briceno%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34176,7 +34204,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.431Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/romil-verma?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRomil%2520Verma%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34241,7 +34270,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jane-leu?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJane%2520Leu%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34339,7 +34369,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/gerard-adams?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DGerard%2520Adams%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34392,7 +34423,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/snehal-fulzele?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSnehal%2520Fulzele%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34482,7 +34514,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/marty-johnson?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMarty%2520Johnson%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34588,7 +34621,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/doug-manoni?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDoug%2520Manoni%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34679,7 +34713,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/kapil-chaudhry?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKapil%2520Chaudhry%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34724,7 +34759,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/ryan-hanks?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRyan%2520Hanks%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34789,7 +34825,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/bingrui-yang?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBingrui%2520Yang%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34856,7 +34893,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/avinash-nagla?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DAvinash%2520Nagla%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34896,7 +34934,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/melody-mccloskey?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMelody%2520Mccloskey%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -34982,7 +35021,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/yash-thakkar?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DYash%2520Thakkar%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35033,7 +35073,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/matt-birchby?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMatt%2520Birchby%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35110,7 +35151,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/karan-chaudhry?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKaran%2520Chaudhry%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35183,7 +35225,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/karla-king?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKarla%2520King%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35282,7 +35325,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:07.908Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/bradford-rand?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBradford%2520Rand%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35376,7 +35420,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/adam-evarts-msis-leed-ap?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DAdam%2520Evarts%252C%2520Msis%252C%2520Leed%2520Ap%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35468,7 +35513,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/dan-rosenberg?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDan%2520Rosenberg%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35578,7 +35624,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/carrie-zimmerman?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DCarrie%2520Zimmerman%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35664,7 +35711,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/tom-truitt?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DTom%2520Truitt%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35734,7 +35782,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jon-haws-rn-bsn-bs-alumnus-ccrn?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJon%2520Haws%2520Rn%2520Bsn%2520Bs%2520Alumnus%2520Ccrn%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35784,7 +35833,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/will-trepp?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DWill%2520Trepp%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35834,7 +35884,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/matthew-lopez?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMatthew%2520Lopez%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -35938,7 +35989,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/stanley-moses-sathianthan?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DStanley%2520Moses%2520Sathianthan%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36023,7 +36075,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/bill-stanberry?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBill%2520Stanberry%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36062,7 +36115,8 @@
         "score": 65,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/patrick-lacy?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DPatrick%2520Lacy%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36117,7 +36171,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/erol-uzumeri?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DErol%2520Uzumeri%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36201,7 +36256,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jon-meyers?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJon%2520Meyers%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36276,7 +36332,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/derrick-whiting?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDerrick%2520Whiting%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36345,7 +36402,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/eric-rutberg?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DEric%2520Rutberg%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36447,7 +36505,8 @@
         "score": 70,
         "notes": "",
         "created_at": "2026-08-28T00:07:08.449Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/john-rosshirt?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJohn%2520Rosshirt%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36544,7 +36603,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/david-miller?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDavid%2520Miller%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36614,7 +36674,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/david-zito?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDavid%2520Zito%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36668,7 +36729,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/shun-hagiwara?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DShun%2520Hagiwara%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36751,7 +36813,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/will-etheridge?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DWill%2520Etheridge%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36827,7 +36890,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/lou-usherwood?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DLou%2520Usherwood%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36871,7 +36935,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jay-sappidi?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJay%2520Sappidi%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -36942,7 +37007,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/tj-nahigian?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DTj%2520Nahigian%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37018,7 +37084,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/monica-lim?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMonica%2520Lim%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37150,7 +37217,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/michael-menzer?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMichael%2520Menzer%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37242,7 +37310,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/randall-smith?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRandall%2520Smith%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37308,7 +37377,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/brian-zhao?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBrian%2520Zhao%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37379,7 +37449,8 @@
         "score": 70,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/jamie-hager?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJamie%2520Hager%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37447,7 +37518,8 @@
         "score": 90,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/taylor-fearrington?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DTaylor%2520Fearrington%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37522,7 +37594,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.947Z"
+        "updated_at": "2026-08-28T00:59:21.947Z",
+        "avatar_url": "https://unavatar.io/linkedin/marcee-kleinman?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMarcee%2520Kleinman%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37618,7 +37691,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.006Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/rick-gibson?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRick%2520Gibson%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37699,7 +37773,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/mike-moeller?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMike%2520Moeller%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37737,7 +37812,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/kik-lee?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKik%2520Lee%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37777,7 +37853,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/landon-tucker?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DLandon%2520Tucker%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37860,7 +37937,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/sunil-s-ranka?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSunil%2520S.%2520Ranka%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -37994,7 +38072,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/gabriel-richman?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DGabriel%2520Richman%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38041,7 +38120,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/peter-trovato?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DPeter%2520Trovato%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38114,7 +38194,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/brad-thatcher?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBrad%2520Thatcher%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38179,7 +38260,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/richard-wein?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DRichard%2520Wein%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38252,7 +38334,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/iqbal-kaur?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DIqbal%2520Kaur%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38371,7 +38454,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/david-slavich?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDavid%2520Slavich%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38456,7 +38540,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/karen-arena?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKaren%2520Arena%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38537,7 +38622,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/michael-diamond?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMichael%2520Diamond%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38580,7 +38666,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/jonathan-h-choi?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJonathan%2520H.%2520Choi%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38627,7 +38714,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/andy-miller?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DAndy%2520Miller%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38682,7 +38770,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.393Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/daniel-han?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDaniel%2520Han%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38746,7 +38835,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/greg-louie?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DGreg%2520Louie%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38831,7 +38921,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/lacey-kaelani-dahan?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DLacey%2520Kaelani-dahan%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38920,7 +39011,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/bill-chesterson?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBill%2520Chesterson%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -38984,7 +39076,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/brad-barke?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBrad%2520Barke%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39106,7 +39199,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/gabriela-mihailescu?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DGabriela%2520Mihailescu%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39146,7 +39240,8 @@
         "score": 85,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/susanna-nichols?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSusanna%2520Nichols%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39199,7 +39294,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/marni-slavick?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMarni%2520Slavick%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39245,7 +39341,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/jim-stein?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJim%2520Stein%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39326,7 +39423,8 @@
         "score": 90,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/dave-lewis?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDave%2520Lewis%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39403,7 +39501,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/susan-johnson?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSusan%2520Johnson%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39444,7 +39543,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/sida-wang?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DSida%2520Wang%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39533,7 +39633,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/tim-cramer?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DTim%2520Cramer%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39591,7 +39692,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/carol-brooks?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DCarol%2520Brooks%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39630,7 +39732,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/kevin-vedrine?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DKevin%2520Vedrine%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39687,7 +39790,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:09.942Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/michael-slovis?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMichael%2520Slovis%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39726,7 +39830,8 @@
         "score": 95,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/melinda-ellis-evers?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DMelinda%2520Ellis%2520Evers%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39774,7 +39879,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/bala-ambravan?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DBala%2520Ambravan%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39876,7 +39982,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/dan-coday?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DDan%2520Coday%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39935,7 +40042,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/james-ellis?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJames%2520Ellis%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -39998,7 +40106,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/jacob-patton?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJacob%2520Patton%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -40080,7 +40189,8 @@
         "score": 70,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/angela-bancalari?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DAngela%2520Bancalari%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -40143,7 +40253,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/thomas-dietzel?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DThomas%2520Dietzel%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -40250,7 +40361,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/jeff-scott?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DJeff%2520Scott%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ],
     [
@@ -40318,7 +40430,8 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:10.375Z",
-        "updated_at": "2026-08-28T00:59:21.948Z"
+        "updated_at": "2026-08-28T00:59:21.948Z",
+        "avatar_url": "https://unavatar.io/linkedin/neal-arwood?fallback=https%3A%2F%2Fui-avatars.com%2Fapi%2F%3Fname%3DNeal%2520Arwood%26background%3D0F2B1D%26color%3DC59B27%26bold%3Dtrue%26size%3D128"
       }
     ]
   ],
@@ -41653,6 +41766,38 @@
         "content": "Manual individual record update performed by Test User.",
         "performed_by": "Test User",
         "created_at": "2026-08-28T01:27:50.795Z"
+      }
+    ],
+    [
+      "980c8fcd-510b-4c50-8b61-3f5228f7586d",
+      {
+        "id": "980c8fcd-510b-4c50-8b61-3f5228f7586d",
+        "lead_id": "lead-27fe1d9c0a5a",
+        "org_id": "org-demo-123",
+        "type": "field_update",
+        "field_name": "contact_number",
+        "old_value": "+1 (703) 864-0815",
+        "new_value": "+1 (703) 864-0815, +13475568353",
+        "summary": "Detail corrected: \"contact_number\" updated from \"+1 (703) 864-0815\" to \"+1 (703) 864-0815, +13475568353\"",
+        "content": "Manual individual record update performed by Alex (Owner).",
+        "performed_by": "Alex (Owner)",
+        "created_at": "2026-08-28T02:01:56.554Z"
+      }
+    ],
+    [
+      "8946ff68-5d2d-4e45-a59d-5967e55ffec6",
+      {
+        "id": "8946ff68-5d2d-4e45-a59d-5967e55ffec6",
+        "lead_id": "lead-27fe1d9c0a5a",
+        "org_id": "org-demo-123",
+        "type": "field_update",
+        "field_name": "email",
+        "old_value": "carlabriceno@gmail.com, cbriceno6@gmail.com",
+        "new_value": "carlabriceno@gmail.com, cbriceno6@gmail.com, carla.briceno@bixal.com",
+        "summary": "Detail corrected: \"email\" updated from \"carlabriceno@gmail.com, cbriceno6@gmail.com\" to \"carlabriceno@gmail.com, cbriceno6@gmail.com, carla.briceno@bixal.com\"",
+        "content": "Manual individual record update performed by Alex (Owner).",
+        "performed_by": "Alex (Owner)",
+        "created_at": "2026-08-28T02:03:33.706Z"
       }
     ]
   ]
