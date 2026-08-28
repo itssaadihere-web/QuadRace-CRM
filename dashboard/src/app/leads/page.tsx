@@ -42,7 +42,7 @@ import {
   Check
 } from 'lucide-react';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '';
 
 export interface Lead {
   id: string;
@@ -212,27 +212,60 @@ export default function LeadsPage() {
   const [copiedId, setCopiedId] = useState<string>('');
   const [successToast, setSuccessToast] = useState<string>('');
 
-  // Load Leads & Stats
+  // Load Leads & Stats (with instant offline cache and Next.js built-in API)
   const fetchData = async () => {
     try {
+      // 1. Instant hydration from localStorage if available
+      if (typeof window !== 'undefined' && leads.length === 0) {
+        const cachedLeads = localStorage.getItem('quadrace_crm_leads');
+        const cachedStats = localStorage.getItem('quadrace_crm_stats');
+        if (cachedLeads) {
+          try { setLeads(JSON.parse(cachedLeads)); } catch {}
+        }
+        if (cachedStats) {
+          try { setStats(JSON.parse(cachedStats)); } catch {}
+        }
+      }
+
       setLoading(true);
-      const [leadsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/leads?limit=200&sort_by=${sortBy}&order=${sortOrder}`, {
-          headers: { 'x-org-id': 'org-demo-123' }
-        }),
-        fetch(`${API_BASE}/api/leads/stats`, {
-          headers: { 'x-org-id': 'org-demo-123' }
-        })
-      ]);
+      let leadsRes: Response;
+      let statsRes: Response;
+
+      try {
+        [leadsRes, statsRes] = await Promise.all([
+          fetch(`${API_BASE}/api/leads?limit=200&sort_by=${sortBy}&order=${sortOrder}`, {
+            headers: { 'x-org-id': 'org-demo-123' }
+          }),
+          fetch(`${API_BASE}/api/leads/stats`, {
+            headers: { 'x-org-id': 'org-demo-123' }
+          })
+        ]);
+      } catch {
+        // Fallback to local port 5000 if running
+        [leadsRes, statsRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/leads?limit=200&sort_by=${sortBy}&order=${sortOrder}`, {
+            headers: { 'x-org-id': 'org-demo-123' }
+          }),
+          fetch(`http://localhost:5000/api/leads/stats`, {
+            headers: { 'x-org-id': 'org-demo-123' }
+          })
+        ]);
+      }
 
       const leadsData = await leadsRes.json();
       const statsData = await statsRes.json();
 
-      if (leadsData.success) {
+      if (leadsData.success && Array.isArray(leadsData.leads)) {
         setLeads(leadsData.leads);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('quadrace_crm_leads', JSON.stringify(leadsData.leads));
+        }
       }
       if (statsData.success) {
         setStats(statsData);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('quadrace_crm_stats', JSON.stringify(statsData));
+        }
       }
     } catch (err) {
       console.error('Failed to fetch leads:', err);
@@ -328,14 +361,25 @@ export default function LeadsPage() {
   // Quick Stage Update
   const handleStageChange = async (leadId: string, newStatus: string) => {
     try {
-      const res = await fetch(`${API_BASE}/api/leads/${leadId}`, {
+      let res = await fetch(`${API_BASE}/api/leads/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
         body: JSON.stringify({ status: newStatus, performed_by: 'Pipeline Agent' })
       });
+      if (!res.ok) {
+        res = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
+          body: JSON.stringify({ status: newStatus, performed_by: 'Pipeline Agent' })
+        });
+      }
       const data = await res.json();
-      if (data.success) {
-        setLeads(prev => prev.map(l => l.id === leadId ? data.lead : l));
+      if (data.success && data.lead) {
+        setLeads(prev => {
+          const next = prev.map(l => l.id === leadId ? data.lead : l);
+          if (typeof window !== 'undefined') localStorage.setItem('quadrace_crm_leads', JSON.stringify(next));
+          return next;
+        });
         if (selectedLead && selectedLead.id === leadId) {
           setSelectedLead(data.lead);
           setEditForm(data.lead);
@@ -377,11 +421,18 @@ export default function LeadsPage() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/api/leads/${selectedLead.id}`, {
+      let res = await fetch(`${API_BASE}/api/leads/${selectedLead.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
         body: JSON.stringify(payload)
       });
+      if (!res.ok) {
+        res = await fetch(`http://localhost:5000/api/leads/${selectedLead.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
+          body: JSON.stringify(payload)
+        });
+      }
       const data = await res.json();
       if (data.success && data.lead) {
         setSelectedLead(data.lead);
@@ -398,7 +449,11 @@ export default function LeadsPage() {
           : [];
         setEmailList(newEmails.length > 0 ? newEmails : ['']);
 
-        setLeads(prev => prev.map(l => l.id === selectedLead.id ? data.lead : l));
+        setLeads(prev => {
+          const next = prev.map(l => l.id === selectedLead.id ? data.lead : l);
+          if (typeof window !== 'undefined') localStorage.setItem('quadrace_crm_leads', JSON.stringify(next));
+          return next;
+        });
         
         if (data.logged_changes && data.logged_changes.length > 0) {
           setActivityLogs(prev => [...data.logged_changes, ...prev]);
@@ -411,7 +466,7 @@ export default function LeadsPage() {
       }
     } catch (err: any) {
       console.error('Failed to save lead:', err);
-      showToast(`Network error saving lead: ${err.message || 'Please check backend server'}`);
+      showToast(`Network error saving lead: ${err.message || 'Please check connection'}`);
     } finally {
       setSavingEdit(false);
     }
