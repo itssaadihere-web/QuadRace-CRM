@@ -1,0 +1,20 @@
+# Netlify Configuration for QuadRace CRM Monorepo
+
+[build]
+  # Specify the dashboard subdirectory as the base directory
+  base = "dashboard"
+  
+  # Build command for Next.js app
+  command = "npm run build"
+  
+  # Publish directory for Next.js App Router
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Redirects for client-side routing (App Router fallback)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
