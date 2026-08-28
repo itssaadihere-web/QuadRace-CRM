@@ -1,8 +1,16 @@
 import React from 'react';
 
-export function QuadraceLogo({ className = '', size = 52 }: { className?: string; size?: number }) {
+export function QuadraceLogo({ 
+  className = '', 
+  size = 42,
+  subtitle = 'AI Omnichannel Platform'
+}: { 
+  className?: string; 
+  size?: number;
+  subtitle?: string;
+}) {
   return (
-    <div className={`flex items-center gap-3 shrink-0 ${className}`}>
+    <div className={`flex items-center gap-2.5 shrink-0 ${className}`}>
       {/* Official Quadrace CRM Crisp Image Logo */}
       <img
         src="/logo.png"
@@ -26,8 +34,8 @@ export function QuadraceLogo({ className = '', size = 52 }: { className?: string
           <span className="font-black text-lg tracking-tight text-[#0F2B1D] whitespace-nowrap">QUADRACE</span>
           <span className="font-black text-lg tracking-tight text-[#C59B27] whitespace-nowrap">CRM</span>
         </div>
-        <span className="text-[9.5px] font-extrabold text-slate-500 tracking-wider uppercase mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
-          AI-Powered Omnichannel Engagement
+        <span className="text-[8.5px] font-extrabold text-slate-500 tracking-wider uppercase mt-1 whitespace-nowrap">
+          {subtitle}
         </span>
       </div>
     </div>
