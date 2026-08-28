@@ -492,33 +492,45 @@ export function resolveLinkedInProfilePicture(
   linkedinUrl?: string, 
   email?: string
 ): string {
-  if (explicitUrl && explicitUrl.trim() !== '' && !explicitUrl.includes('ui-avatars.com') && !explicitUrl.includes('unsplash.com')) {
-    return explicitUrl;
+  // If explicit image URL is provided (e.g. media.licdn.com, licdn.com, or user custom photo), use it directly!
+  if (explicitUrl && explicitUrl.trim() !== '' && !explicitUrl.includes('ui-avatars.com') && !explicitUrl.includes('unavatar.io/linkedin/linkedin.com')) {
+    return explicitUrl.trim();
   }
 
-  // 1. If LinkedIn URL has a direct username, use that
+  // 1. Extract username from linkedin_url
   let username = '';
   if (linkedinUrl && linkedinUrl.trim() !== '') {
-    const cleaned = linkedinUrl.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//i, '').replace(/[/?#].*$/, '').trim();
-    if (cleaned && !cleaned.startsWith('ACoAA')) {
+    const cleaned = linkedinUrl
+      .trim()
+      .replace(/^(https?:\/\/)?(www\.)?linkedin\.com\/in\//i, '')
+      .replace(/^\/in\//i, '')
+      .replace(/[/?#].*$/, '')
+      .trim();
+
+    if (cleaned && !cleaned.toLowerCase().includes('linkedin.com') && !cleaned.startsWith('ACoAA')) {
       username = cleaned;
     }
   }
 
-  // 2. Fallback to name slug (e.g. "pablopalafox" or "carlabriceno")
+  // 2. Fallback to name slug (e.g. "carla-briceno" or "carlabriceno")
   if (!username && fullName) {
-    username = fullName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanSlug = fullName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (cleanSlug) {
+      username = cleanSlug;
+    }
   }
 
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
 
-  if (username) {
+  if (username && !username.includes('linkedin.com')) {
     return `https://unavatar.io/linkedin/${username}?fallback=${encodeURIComponent(fallbackAvatar)}`;
   }
 
   if (email && email.includes('@')) {
     const firstEmail = email.split(/[,;\n]+/)[0].trim();
-    return `https://unavatar.io/${firstEmail}?fallback=${encodeURIComponent(fallbackAvatar)}`;
+    if (firstEmail) {
+      return `https://unavatar.io/${encodeURIComponent(firstEmail)}?fallback=${encodeURIComponent(fallbackAvatar)}`;
+    }
   }
 
   return fallbackAvatar;

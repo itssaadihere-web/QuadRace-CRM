@@ -14,8 +14,8 @@ const server = http.createServer(app);
 // Enable CORS for Desktop Dashboard, Mobile App, and Web Widget
 app.use(cors({
   origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-org-id']
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-org-id', 'x-user-name']
 }));
 
 app.use(express.json({ limit: '10mb' }));

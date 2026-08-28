@@ -881,6 +881,9 @@ export default function LeadsPage() {
                             <img
                               src={lead.avatar_url}
                               alt={lead.full_name}
+                              onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
+                              }}
                               className="w-8 h-8 rounded-full object-cover border border-[#C59B27]/50 shrink-0 shadow-2xs"
                             />
                           ) : (
@@ -1189,6 +1192,9 @@ export default function LeadsPage() {
                                   <img
                                     src={lead.avatar_url}
                                     alt={lead.full_name}
+                                    onError={(e) => {
+                                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
+                                    }}
                                     className="w-8 h-8 rounded-full object-cover border border-[#C59B27]/50 shrink-0 shadow-2xs"
                                   />
                                 ) : (
@@ -1523,6 +1529,9 @@ export default function LeadsPage() {
                   <img
                     src={selectedLead.avatar_url}
                     alt={selectedLead.full_name}
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedLead.full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
+                    }}
                     className="w-12 h-12 rounded-2xl object-cover border-2 border-[#C59B27] shrink-0 shadow-md"
                   />
                 ) : (
@@ -1787,7 +1796,14 @@ export default function LeadsPage() {
                     <div className="flex items-center gap-2">
                       <div className="w-9 h-9 rounded-xl border border-slate-200 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
                         {editForm.avatar_url ? (
-                          <img src={editForm.avatar_url} alt="Preview" className="w-full h-full object-cover" />
+                          <img 
+                            src={editForm.avatar_url} 
+                            alt="Preview" 
+                            onError={(e) => {
+                              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
+                            }}
+                            className="w-full h-full object-cover" 
+                          />
                         ) : (
                           <span className="text-[10px] font-bold text-slate-400">No Pic</span>
                         )}
