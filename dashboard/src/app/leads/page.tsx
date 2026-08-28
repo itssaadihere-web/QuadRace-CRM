@@ -162,6 +162,8 @@ export default function LeadsPage() {
 
   // Edit Lead Form State
   const [editForm, setEditForm] = useState<Partial<Lead>>({});
+  const [phoneList, setPhoneList] = useState<string[]>(['']);
+  const [emailList, setEmailList] = useState<string[]>(['']);
   const [savingEdit, setSavingEdit] = useState<boolean>(false);
   const [activityLogs, setActivityLogs] = useState<LeadActivityLog[]>([]);
   const [copiedId, setCopiedId] = useState<string>('');
@@ -254,6 +256,18 @@ export default function LeadsPage() {
   const handleOpenLead = async (lead: Lead) => {
     setSelectedLead(lead);
     setEditForm({ ...lead });
+
+    // Parse multiple phone numbers and email addresses
+    const parsedPhones = lead.contact_number
+      ? lead.contact_number.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean)
+      : [];
+    setPhoneList(parsedPhones.length > 0 ? parsedPhones : ['']);
+
+    const parsedEmails = lead.email
+      ? lead.email.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean)
+      : [];
+    setEmailList(parsedEmails.length > 0 ? parsedEmails : ['']);
+
     setIsDetailDrawerOpen(true);
     setDrawerTab('details');
 
@@ -299,11 +313,21 @@ export default function LeadsPage() {
     if (!selectedLead) return;
 
     setSavingEdit(true);
+    const consolidatedPhones = phoneList.map(p => p.trim()).filter(Boolean).join(', ');
+    const consolidatedEmails = emailList.map(e => e.trim()).filter(Boolean).join(', ');
+
+    const payload = {
+      ...editForm,
+      contact_number: consolidatedPhones,
+      email: consolidatedEmails,
+      performed_by: 'Alex (Owner)'
+    };
+
     try {
       const res = await fetch(`${API_BASE}/api/leads/${selectedLead.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
-        body: JSON.stringify({ ...editForm, performed_by: 'Alex (Owner)' })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (data.success) {
@@ -854,15 +878,23 @@ export default function LeadsPage() {
                       {/* 3. Contact Number (with click-to-edit if blank) */}
                       <td className="py-3 px-4">
                         {lead.contact_number ? (
-                          <div className="flex items-center gap-1.5 font-mono text-slate-900">
-                            <span>{lead.contact_number}</span>
-                            <button
-                              onClick={() => copyToClipboard(lead.contact_number, `ph-${lead.id}`)}
-                              className="text-slate-400 hover:text-slate-600 p-0.5"
-                              title="Copy Phone"
-                            >
-                              {copiedId === `ph-${lead.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                            </button>
+                          <div className="space-y-1">
+                            {lead.contact_number.split(/[,;\n]+/).map((ph, idx) => {
+                              const cleanPh = ph.trim();
+                              if (!cleanPh) return null;
+                              return (
+                                <div key={idx} className="flex items-center gap-1.5 font-mono text-slate-900 text-[11px]">
+                                  <span>{cleanPh}</span>
+                                  <button
+                                    onClick={() => copyToClipboard(cleanPh, `ph-${lead.id}-${idx}`)}
+                                    className="text-slate-400 hover:text-slate-600 p-0.5"
+                                    title="Copy Phone"
+                                  >
+                                    {copiedId === `ph-${lead.id}-${idx}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         ) : (
                           <button
@@ -877,15 +909,23 @@ export default function LeadsPage() {
                       {/* 4. Email Address */}
                       <td className="py-3 px-4">
                         {lead.email ? (
-                          <div className="flex items-center gap-1.5 font-mono text-slate-900">
-                            <span className="truncate max-w-[140px]" title={lead.email}>{lead.email}</span>
-                            <button
-                              onClick={() => copyToClipboard(lead.email, `em-${lead.id}`)}
-                              className="text-slate-400 hover:text-slate-600 p-0.5"
-                              title="Copy Email"
-                            >
-                              {copiedId === `em-${lead.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                            </button>
+                          <div className="space-y-1">
+                            {lead.email.split(/[,;\n]+/).map((em, idx) => {
+                              const cleanEm = em.trim();
+                              if (!cleanEm) return null;
+                              return (
+                                <div key={idx} className="flex items-center gap-1.5 font-mono text-slate-900 text-[11px]">
+                                  <span className="truncate max-w-[150px]" title={cleanEm}>{cleanEm}</span>
+                                  <button
+                                    onClick={() => copyToClipboard(cleanEm, `em-${lead.id}-${idx}`)}
+                                    className="text-slate-400 hover:text-slate-600 p-0.5"
+                                    title="Copy Email"
+                                  >
+                                    {copiedId === `em-${lead.id}-${idx}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         ) : (
                           <button
@@ -1124,10 +1164,13 @@ export default function LeadsPage() {
                             </div>
 
                             {/* Contact Badges preview */}
-                            <div className="flex items-center gap-2 text-[11px]">
+                            <div className="flex items-center gap-2 text-[11px] flex-wrap">
                               {lead.contact_number ? (
                                 <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 font-mono font-bold flex items-center gap-1 border border-emerald-200">
-                                  <Phone className="w-3 h-3 text-emerald-600" /> Phone
+                                  <Phone className="w-3 h-3 text-emerald-600" />
+                                  {lead.contact_number.split(/[,;\n]+/).filter(Boolean).length > 1 
+                                    ? `${lead.contact_number.split(/[,;\n]+/).filter(Boolean).length} Phones` 
+                                    : 'Phone'}
                                 </span>
                               ) : (
                                 <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-400 border border-slate-200">No Phone</span>
@@ -1135,7 +1178,10 @@ export default function LeadsPage() {
 
                               {lead.email ? (
                                 <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-800 font-mono font-bold flex items-center gap-1 border border-blue-200">
-                                  <Mail className="w-3 h-3 text-blue-600" /> Email
+                                  <Mail className="w-3 h-3 text-blue-600" />
+                                  {lead.email.split(/[,;\n]+/).filter(Boolean).length > 1 
+                                    ? `${lead.email.split(/[,;\n]+/).filter(Boolean).length} Emails` 
+                                    : 'Email'}
                                 </span>
                               ) : (
                                 <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-400 border border-slate-200">No Email</span>
@@ -1497,35 +1543,105 @@ export default function LeadsPage() {
                     </div>
                   </div>
 
-                  {/* Contact Enrichment Inputs */}
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                    <div>
-                      <label className="text-xs font-bold text-[#0F2B1D] block mb-1 flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5 text-[#C59B27]" /> Contact Phone Number
-                      </label>
-                      <input
-                        type="text"
-                        value={editForm.contact_number || ''}
-                        onChange={(e) => setEditForm({ ...editForm, contact_number: e.target.value })}
-                        placeholder="e.g. +1 (555) 019-2831"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
-                      />
-                      <span className="text-[10px] text-slate-400">Manual input field</span>
+                  {/* Contact Enrichment Inputs with Multi-Phone & Multi-Email Add Support */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+                    
+                    {/* Contact Phone Numbers List */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-[#0F2B1D] flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 text-[#C59B27]" /> Contact Phone Number
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setPhoneList(prev => [...prev, ''])}
+                          className="px-2 py-1 bg-[#0F2B1D] hover:bg-[#153B27] text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-2xs transition border border-[#C59B27]"
+                        >
+                          <Plus className="w-3 h-3 text-[#C59B27]" /> Add Number
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {phoneList.map((phone, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={phone}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setPhoneList(prev => {
+                                  const next = [...prev];
+                                  next[idx] = val;
+                                  return next;
+                                });
+                              }}
+                              placeholder={idx === 0 ? "e.g. +17038640815 (Primary)" : "e.g. +1 (555) 019-2831 (Alt)"}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
+                            />
+                            {phoneList.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setPhoneList(prev => prev.filter((_, i) => i !== idx))}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
+                                title="Remove number"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">Click "+ Add Number" to add additional phone numbers</span>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-bold text-[#0F2B1D] block mb-1 flex items-center gap-1">
-                        <Mail className="w-3.5 h-3.5 text-[#C59B27]" /> Direct Email Address
-                      </label>
-                      <input
-                        type="email"
-                        value={editForm.email || ''}
-                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                        placeholder="e.g. prospect@company.com"
-                        className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
-                      />
-                      <span className="text-[10px] text-slate-400">Manual input field</span>
+                    {/* Direct Email Addresses List */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-[#0F2B1D] flex items-center gap-1.5">
+                          <Mail className="w-3.5 h-3.5 text-[#C59B27]" /> Direct Email Address
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setEmailList(prev => [...prev, ''])}
+                          className="px-2 py-1 bg-[#0F2B1D] hover:bg-[#153B27] text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-2xs transition border border-[#C59B27]"
+                        >
+                          <Plus className="w-3 h-3 text-[#C59B27]" /> Add Email
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {emailList.map((email, idx) => (
+                          <div key={idx} className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={email}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setEmailList(prev => {
+                                  const next = [...prev];
+                                  next[idx] = val;
+                                  return next;
+                                });
+                              }}
+                              placeholder={idx === 0 ? "e.g. carlabriceno@gmail.com (Primary)" : "e.g. cbriceno6@gmail.com (Alt)"}
+                              className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
+                            />
+                            {emailList.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => setEmailList(prev => prev.filter((_, i) => i !== idx))}
+                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition"
+                                title="Remove email"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-slate-400 block">Click "+ Add Email" to add additional email addresses</span>
                     </div>
+
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -2032,8 +2148,8 @@ export default function LeadsPage() {
                 <div>
                   <label className="text-xs font-bold text-slate-800 block mb-1">Recipient Email</label>
                   <input
-                    type="email"
-                    value={commModal.lead.email || ''}
+                    type="text"
+                    defaultValue={commModal.lead.email || ''}
                     placeholder="lead@company.com"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none"
                   />
