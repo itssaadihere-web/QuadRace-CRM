@@ -32980,8 +32980,8 @@
         "first_name": "Carla",
         "last_name": "Briceno",
         "full_name": "Carla Briceno",
-        "email": "",
-        "contact_number": "",
+        "email": "carlabriceno@gmail.com, cbriceno6@gmail.com",
+        "contact_number": "+1 (703) 864-0815",
         "country_name": "united states",
         "region_name": "virginia",
         "city": "oakton",
@@ -33094,7 +33094,7 @@
         "score": 100,
         "notes": "",
         "created_at": "2026-08-28T00:07:06.885Z",
-        "updated_at": "2026-08-28T00:59:21.943Z"
+        "updated_at": "2026-08-28T01:27:50.795Z"
       }
     ],
     [
@@ -41621,6 +41621,38 @@
         "content": "Record initialized with title: Owner at Net3 it",
         "performed_by": "System Importer",
         "created_at": "2026-08-28T00:07:10.375Z"
+      }
+    ],
+    [
+      "9574c22d-f795-46b7-ae1a-2cde03117dd5",
+      {
+        "id": "9574c22d-f795-46b7-ae1a-2cde03117dd5",
+        "lead_id": "lead-27fe1d9c0a5a",
+        "org_id": "org-demo-123",
+        "type": "field_update",
+        "field_name": "email",
+        "old_value": "(empty)",
+        "new_value": "carlabriceno@gmail.com, cbriceno6@gmail.com",
+        "summary": "Detail corrected: \"email\" updated from \"(empty)\" to \"carlabriceno@gmail.com, cbriceno6@gmail.com\"",
+        "content": "Manual individual record update performed by Test User.",
+        "performed_by": "Test User",
+        "created_at": "2026-08-28T01:27:50.795Z"
+      }
+    ],
+    [
+      "6171129b-8327-48b4-af13-df708d93a47c",
+      {
+        "id": "6171129b-8327-48b4-af13-df708d93a47c",
+        "lead_id": "lead-27fe1d9c0a5a",
+        "org_id": "org-demo-123",
+        "type": "field_update",
+        "field_name": "contact_number",
+        "old_value": "(empty)",
+        "new_value": "+1 (703) 864-0815",
+        "summary": "Detail corrected: \"contact_number\" updated from \"(empty)\" to \"+1 (703) 864-0815\"",
+        "content": "Manual individual record update performed by Test User.",
+        "performed_by": "Test User",
+        "created_at": "2026-08-28T01:27:50.795Z"
       }
     ]
   ]

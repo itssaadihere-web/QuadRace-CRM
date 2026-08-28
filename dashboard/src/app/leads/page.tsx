@@ -308,13 +308,23 @@ export default function LeadsPage() {
   };
 
   // Save manual field updates on lead
-  const handleSaveLeadEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveLeadEdit = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!selectedLead) return;
 
     setSavingEdit(true);
-    const consolidatedPhones = phoneList.map(p => p.trim()).filter(Boolean).join(', ');
-    const consolidatedEmails = emailList.map(e => e.trim()).filter(Boolean).join(', ');
+    // Flatten and clean any comma-delimited strings in each entry
+    const consolidatedPhones = phoneList
+      .flatMap(p => p.split(/[,;\n]+/))
+      .map(p => p.trim())
+      .filter(Boolean)
+      .join(', ');
+
+    const consolidatedEmails = emailList
+      .flatMap(em => em.split(/[,;\n]+/))
+      .map(em => em.trim())
+      .filter(Boolean)
+      .join(', ');
 
     const payload = {
       ...editForm,
@@ -330,19 +340,35 @@ export default function LeadsPage() {
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (data.success) {
+      if (data.success && data.lead) {
         setSelectedLead(data.lead);
         setEditForm(data.lead);
+        
+        // Re-sync phone and email lists
+        const newPhones = data.lead.contact_number 
+          ? data.lead.contact_number.split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean)
+          : [];
+        setPhoneList(newPhones.length > 0 ? newPhones : ['']);
+
+        const newEmails = data.lead.email 
+          ? data.lead.email.split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean)
+          : [];
+        setEmailList(newEmails.length > 0 ? newEmails : ['']);
+
         setLeads(prev => prev.map(l => l.id === selectedLead.id ? data.lead : l));
+        
         if (data.logged_changes && data.logged_changes.length > 0) {
           setActivityLogs(prev => [...data.logged_changes, ...prev]);
           showToast(`Saved! ${data.logged_changes.length} field corrections logged in audit timeline.`);
         } else {
           showToast('Lead details updated successfully.');
         }
+      } else {
+        showToast(data.error || 'Failed to save lead updates.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to save lead:', err);
+      showToast(`Network error saving lead: ${err.message || 'Please check backend server'}`);
     } finally {
       setSavingEdit(false);
     }
@@ -1573,7 +1599,7 @@ export default function LeadsPage() {
 
               {/* TAB 1: MANUAL DETAILS EDIT FORM */}
               {drawerTab === 'details' && (
-                <form onSubmit={handleSaveLeadEdit} className="space-y-4">
+                <form onSubmit={handleSaveLeadEdit} noValidate className="space-y-4">
                   <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>Any field update or correction here will be automatically audited and logged with old vs new value timestamps.</span>
@@ -1923,7 +1949,8 @@ export default function LeadsPage() {
                     <button
                       type="submit"
                       disabled={savingEdit}
-                      className="px-5 py-2.5 bg-[#0F2B1D] hover:bg-[#153B27] text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-1.5 transition border border-[#C59B27]"
+                      onClick={(e) => handleSaveLeadEdit(e)}
+                      className="px-5 py-2.5 bg-[#0F2B1D] hover:bg-[#153B27] active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-1.5 transition border border-[#C59B27] cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4 text-[#C59B27]" />
                       {savingEdit ? 'Auditing & Saving...' : 'Save & Record Corrections in Audit'}
