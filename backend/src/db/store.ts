@@ -109,6 +109,7 @@ export interface Lead {
   job_department: string;
   job_seniority_level: string[];
   job_title: string;
+  avatar_url?: string;
   status: LeadStatus;
   score: number;
   notes?: string;
@@ -504,6 +505,8 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
     const companyLinkedin = getVal('prospect_company_linkedin');
     const jobDepartment = getVal('prospect_job_department');
     const jobTitle = getVal('prospect_job_title');
+    const explicitAvatar = getVal('avatar_url') || getVal('prospect_avatar') || getVal('profile_picture') || getVal('image_url');
+    const avatarUrl = explicitAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&rounded=true&size=128`;
     const createdAt = getVal('created_at') || new Date().toISOString();
 
     const id = prospectId ? `lead-${prospectId.substring(0, 12)}` : `lead-${uuidv4().substring(0, 10)}`;
@@ -523,6 +526,7 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
       region_name: regionName,
       city: city,
       linkedin_url: linkedin,
+      avatar_url: avatarUrl,
       experience: exp,
       skills: skills,
       interests: interests,

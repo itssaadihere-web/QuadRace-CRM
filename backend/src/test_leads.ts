@@ -34,8 +34,13 @@ function runTests() {
     interests_count: lead1.interests.length,
     score: lead1.score,
     contact_number: lead1.contact_number,
-    email: lead1.email
+    email: lead1.email,
+    avatar_url: lead1.avatar_url
   });
+
+  if (!lead1.avatar_url || !lead1.avatar_url.includes('ui-avatars.com')) {
+    throw new Error(`Expected avatar_url to be generated, got ${lead1.avatar_url}`);
+  }
 
   if (lead1.full_name !== 'Carla Briceno' || lead1.company_name !== 'Bixal') {
     throw new Error(`Lead 1 field mismatch: ${lead1.full_name}, ${lead1.company_name}`);

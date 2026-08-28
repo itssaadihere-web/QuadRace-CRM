@@ -68,6 +68,7 @@ export interface Lead {
   job_department: string;
   job_seniority_level: string[];
   job_title: string;
+  avatar_url?: string;
   status: 'new' | 'contacted' | 'meeting_scheduled' | 'qualified' | 'proposal' | 'won' | 'unqualified';
   score: number;
   notes?: string;
@@ -790,12 +791,20 @@ export default function LeadsPage() {
                   return (
                     <tr key={lead.id} className="hover:bg-slate-50/80 transition group">
                       
-                      {/* 1. Prospect Full Name, Job Title & LinkedIn */}
+                      {/* 1. Prospect Full Name, Avatar Picture, Job Title & LinkedIn */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0">
-                            {initials}
-                          </div>
+                          {lead.avatar_url ? (
+                            <img
+                              src={lead.avatar_url}
+                              alt={lead.full_name}
+                              className="w-8 h-8 rounded-full object-cover border border-[#C59B27]/50 shrink-0 shadow-2xs"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0">
+                              {initials}
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-1.5">
                               <button
@@ -1066,9 +1075,17 @@ export default function LeadsPage() {
                             {/* Card Top: Avatar, Name, LinkedIn & Score */}
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-8 h-8 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0">
-                                  {initials}
-                                </div>
+                                {lead.avatar_url ? (
+                                  <img
+                                    src={lead.avatar_url}
+                                    alt={lead.full_name}
+                                    className="w-8 h-8 rounded-full object-cover border border-[#C59B27]/50 shrink-0 shadow-2xs"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0">
+                                    {initials}
+                                  </div>
+                                )}
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-1.5">
                                     <button
@@ -1382,9 +1399,17 @@ export default function LeadsPage() {
             {/* Drawer Header */}
             <div className="p-6 bg-gradient-to-r from-[#0F2B1D] to-[#153B27] text-white flex items-center justify-between border-b border-[#C59B27]">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-white/10 text-[#C59B27] border border-[#C59B27]/40 flex items-center justify-center font-bold text-sm">
-                  {selectedLead.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
-                </div>
+                {selectedLead.avatar_url ? (
+                  <img
+                    src={selectedLead.avatar_url}
+                    alt={selectedLead.full_name}
+                    className="w-12 h-12 rounded-2xl object-cover border-2 border-[#C59B27] shrink-0 shadow-md"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 text-[#C59B27] border border-[#C59B27]/40 flex items-center justify-center font-bold text-sm">
+                    {selectedLead.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                )}
                 <div>
                   <h2 className="text-base font-bold">{selectedLead.full_name}</h2>
                   <div className="text-xs text-slate-300">{selectedLead.job_title} @ {selectedLead.company_name}</div>
@@ -1535,6 +1560,29 @@ export default function LeadsPage() {
                           </a>
                         )}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Profile Picture Avatar URL */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-800 block mb-1 flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-[#C59B27]" /> Profile Picture / Avatar URL
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-xl border border-slate-200 overflow-hidden shrink-0 bg-slate-100 flex items-center justify-center">
+                        {editForm.avatar_url ? (
+                          <img src={editForm.avatar_url} alt="Preview" className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-400">No Pic</span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={editForm.avatar_url || ''}
+                        onChange={(e) => setEditForm({ ...editForm, avatar_url: e.target.value })}
+                        placeholder="https://... profile photo URL"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none font-mono"
+                      />
                     </div>
                   </div>
 

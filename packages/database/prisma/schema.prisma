@@ -212,6 +212,7 @@ model Lead {
   job_department          String         @default("")
   job_seniority_level     Json           @default("[]")
   job_title               String         @default("")
+  avatar_url              String?
   status                  LeadStatus     @default(new)
   score                   Int            @default(50)
   notes                   String?        @db.Text
