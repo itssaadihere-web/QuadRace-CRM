@@ -1599,7 +1599,14 @@ export default function LeadsPage() {
 
               {/* TAB 1: MANUAL DETAILS EDIT FORM */}
               {drawerTab === 'details' && (
-                <form onSubmit={handleSaveLeadEdit} noValidate className="space-y-4">
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSaveLeadEdit(e);
+                  }} 
+                  noValidate 
+                  className="space-y-4"
+                >
                   <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                     <span>Any field update or correction here will be automatically audited and logged with old vs new value timestamps.</span>
@@ -1947,9 +1954,12 @@ export default function LeadsPage() {
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
                     <button
-                      type="submit"
+                      type="button"
                       disabled={savingEdit}
-                      onClick={(e) => handleSaveLeadEdit(e)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleSaveLeadEdit(e);
+                      }}
                       className="px-5 py-2.5 bg-[#0F2B1D] hover:bg-[#153B27] active:scale-95 text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-1.5 transition border border-[#C59B27] cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4 text-[#C59B27]" />

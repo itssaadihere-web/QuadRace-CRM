@@ -190,10 +190,10 @@ class MultiTenantDataStore {
         if (dump.unansweredGaps) this.unansweredGaps = new Map(dump.unansweredGaps);
         if (dump.leads) {
           this.leads = new Map(dump.leads);
-          // Upgrade any old avatar URLs to realistic LinkedIn corporate headshots
+          // Upgrade any old avatar URLs to live LinkedIn profile pictures
           this.leads.forEach((l, id) => {
-            if (!l.avatar_url || l.avatar_url.includes('ui-avatars.com')) {
-              l.avatar_url = resolveLinkedInProfilePicture(l.full_name, l.row_num || 0);
+            if (!l.avatar_url || l.avatar_url.includes('ui-avatars.com') || l.avatar_url.includes('unsplash.com')) {
+              l.avatar_url = resolveLinkedInProfilePicture(l.full_name, l.row_num || 0, undefined, l.linkedin_url, l.email);
             }
           });
         }
@@ -485,17 +485,43 @@ export const PROFESSIONAL_HEADSHOTS = [
   "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?auto=format&fit=crop&q=80&w=256&h=256"
 ];
 
-export function resolveLinkedInProfilePicture(fullName: string, rowNum: number = 0, explicitUrl?: string): string {
-  if (explicitUrl && explicitUrl.trim() !== '' && !explicitUrl.includes('ui-avatars.com')) {
+export function resolveLinkedInProfilePicture(
+  fullName: string, 
+  rowNum: number = 0, 
+  explicitUrl?: string, 
+  linkedinUrl?: string, 
+  email?: string
+): string {
+  if (explicitUrl && explicitUrl.trim() !== '' && !explicitUrl.includes('ui-avatars.com') && !explicitUrl.includes('unsplash.com')) {
     return explicitUrl;
   }
-  let hash = 0;
-  for (let i = 0; i < fullName.length; i++) {
-    hash = (hash << 5) - hash + fullName.charCodeAt(i);
-    hash |= 0;
+
+  // 1. If LinkedIn URL has a direct username, use that
+  let username = '';
+  if (linkedinUrl && linkedinUrl.trim() !== '') {
+    const cleaned = linkedinUrl.replace(/https?:\/\/(www\.)?linkedin\.com\/in\//i, '').replace(/[/?#].*$/, '').trim();
+    if (cleaned && !cleaned.startsWith('ACoAA')) {
+      username = cleaned;
+    }
   }
-  const idx = Math.abs((hash + rowNum)) % PROFESSIONAL_HEADSHOTS.length;
-  return PROFESSIONAL_HEADSHOTS[idx];
+
+  // 2. Fallback to name slug (e.g. "pablopalafox" or "carlabriceno")
+  if (!username && fullName) {
+    username = fullName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
+
+  if (username) {
+    return `https://unavatar.io/linkedin/${username}?fallback=${encodeURIComponent(fallbackAvatar)}`;
+  }
+
+  if (email && email.includes('@')) {
+    const firstEmail = email.split(/[,;\n]+/)[0].trim();
+    return `https://unavatar.io/${firstEmail}?fallback=${encodeURIComponent(fallbackAvatar)}`;
+  }
+
+  return fallbackAvatar;
 }
 
 /**
@@ -550,7 +576,6 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
     const jobDepartment = getVal('prospect_job_department');
     const jobTitle = getVal('prospect_job_title');
     const explicitAvatar = getVal('avatar_url') || getVal('prospect_avatar') || getVal('profile_picture') || getVal('image_url');
-    const avatarUrl = resolveLinkedInProfilePicture(fullName || 'Lead', isNaN(rowNum) ? i : rowNum, explicitAvatar);
     const createdAt = getVal('created_at') || new Date().toISOString();
 
     // Extract all phone numbers from any matching phone/contact column
@@ -574,6 +599,8 @@ export function parseCsvLeads(csvContent: string, orgId: string = 'org-demo-123'
       .map(v => v.trim())
       .filter(Boolean);
     const emailStr = Array.from(new Set(collectedEmails)).join(', ');
+
+    const avatarUrl = resolveLinkedInProfilePicture(fullName || 'Lead', isNaN(rowNum) ? i : rowNum, explicitAvatar, linkedin, emailStr);
 
     const id = prospectId ? `lead-${prospectId.substring(0, 12)}` : `lead-${uuidv4().substring(0, 10)}`;
 

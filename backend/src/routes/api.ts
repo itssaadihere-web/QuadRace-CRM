@@ -538,7 +538,13 @@ apiRouter.post('/leads/import', (req: Request, res: Response) => {
         job_department: item.job_department || item.prospect_job_department || '',
         job_seniority_level: Array.isArray(item.job_seniority_level) ? item.job_seniority_level : (Array.isArray(item.prospect_job_seniority_level) ? item.prospect_job_seniority_level : []),
         job_title: item.job_title || item.prospect_job_title || '',
-        avatar_url: resolveLinkedInProfilePicture(item.full_name || item.prospect_full_name || 'Lead', idx + 1, item.avatar_url || item.prospect_avatar || item.profile_picture),
+        avatar_url: resolveLinkedInProfilePicture(
+          item.full_name || item.prospect_full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'Lead',
+          idx + 1,
+          item.avatar_url || item.prospect_avatar || item.profile_picture,
+          item.linkedin_url || item.prospect_linkedin,
+          emailStr
+        ),
         status: item.status || 'new',
         score: item.score || 50,
         notes: item.notes || '',
@@ -802,34 +808,36 @@ apiRouter.patch('/leads/:id', (req: Request, res: Response) => {
   const loggedChanges: LeadActivityLog[] = [];
 
   fieldKeys.forEach(key => {
-    if (updates[key] !== undefined && updates[key] !== lead[key]) {
-      const oldVal = String(lead[key] || '');
-      const newVal = String(updates[key] || '');
+    if (updates[key] !== undefined) {
+      const oldVal = String(lead[key] || '').trim();
+      const newVal = String(updates[key] || '').trim();
 
-      // Apply update
-      (lead as any)[key] = updates[key];
+      if (oldVal !== newVal) {
+        // Apply update
+        (lead as any)[key] = updates[key];
 
-      // Auto create audit log for this field update/correction
-      const actId = uuidv4();
-      const isStatus = key === 'status';
-      const changeActivity: LeadActivityLog = {
-        id: actId,
-        lead_id: lead.id,
-        org_id: orgId,
-        type: isStatus ? 'status_change' : 'field_update',
-        field_name: key as string,
-        old_value: oldVal || '(empty)',
-        new_value: newVal || '(cleared)',
-        summary: isStatus 
-          ? `Pipeline stage changed from "${oldVal}" to "${newVal}"`
-          : `Detail corrected: "${key}" updated from "${oldVal || '(empty)'}" to "${newVal}"`,
-        content: `Manual individual record update performed by ${performedBy}.`,
-        performed_by: performedBy,
-        created_at: new Date().toISOString()
-      };
+        // Auto create audit log for this field update/correction
+        const actId = uuidv4();
+        const isStatus = key === 'status';
+        const changeActivity: LeadActivityLog = {
+          id: actId,
+          lead_id: lead.id,
+          org_id: orgId,
+          type: isStatus ? 'status_change' : 'field_update',
+          field_name: key as string,
+          old_value: oldVal || '(empty)',
+          new_value: newVal || '(cleared)',
+          summary: isStatus 
+            ? `Pipeline stage changed from "${oldVal}" to "${newVal}"`
+            : `Detail corrected: "${key}" updated from "${oldVal || '(empty)'}" to "${newVal}"`,
+          content: `Manual individual record update performed by ${performedBy}.`,
+          performed_by: performedBy,
+          created_at: new Date().toISOString()
+        };
 
-      dbStore.leadActivities.set(actId, changeActivity);
-      loggedChanges.push(changeActivity);
+        dbStore.leadActivities.set(actId, changeActivity);
+        loggedChanges.push(changeActivity);
+      }
     }
   });
 
