@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { dbStore, KnowledgeChunk, Lead, LeadActivityLog, Conversation, Message, parseCsvLeads, calculateLeadScore } from '../db/store';
+import { dbStore, KnowledgeChunk, Lead, LeadActivityLog, Conversation, Message, parseCsvLeads, calculateLeadScore, resolveLinkedInProfilePicture } from '../db/store';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
@@ -538,7 +538,7 @@ apiRouter.post('/leads/import', (req: Request, res: Response) => {
         job_department: item.job_department || item.prospect_job_department || '',
         job_seniority_level: Array.isArray(item.job_seniority_level) ? item.job_seniority_level : (Array.isArray(item.prospect_job_seniority_level) ? item.prospect_job_seniority_level : []),
         job_title: item.job_title || item.prospect_job_title || '',
-        avatar_url: item.avatar_url || item.prospect_avatar || item.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.full_name || item.prospect_full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&rounded=true&size=128`,
+        avatar_url: resolveLinkedInProfilePicture(item.full_name || item.prospect_full_name || 'Lead', idx + 1, item.avatar_url || item.prospect_avatar || item.profile_picture),
         status: item.status || 'new',
         score: item.score || 50,
         notes: item.notes || '',

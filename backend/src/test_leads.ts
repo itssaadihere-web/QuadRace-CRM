@@ -38,7 +38,7 @@ function runTests() {
     avatar_url: lead1.avatar_url
   });
 
-  if (!lead1.avatar_url || !lead1.avatar_url.includes('ui-avatars.com')) {
+  if (!lead1.avatar_url || !lead1.avatar_url.startsWith('https://')) {
     throw new Error(`Expected avatar_url to be generated, got ${lead1.avatar_url}`);
   }
 
