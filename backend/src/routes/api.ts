@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { dbStore, KnowledgeChunk, Lead, LeadActivityLog, parseCsvLeads, calculateLeadScore } from '../db/store';
+import { dbStore, KnowledgeChunk, Lead, LeadActivityLog, Conversation, Message, parseCsvLeads, calculateLeadScore } from '../db/store';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
@@ -322,3 +322,655 @@ apiRouter.post('/billing/check-inactivity', (req: Request, res: Response) => {
     message: `Inactivity check completed. ${closedCount} sessions closed due to 15+ min idle time.`
   });
 });
+
+// ----------------------------------------------------
+// 6. LEAD MANAGEMENT, IMPORT, DEDUPLICATION & AUDIT CRM
+// ----------------------------------------------------
+
+// GET LEADS LIST WITH SEARCH, FILTERS, AND PAGINATION
+apiRouter.get('/leads', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  const { 
+    search, 
+    status, 
+    seniority, 
+    country, 
+    missing_field, 
+    sort_by = 'score', 
+    order = 'desc',
+    page = '1',
+    limit = '50'
+  } = req.query;
+
+  let leads = Array.from(dbStore.leads.values()).filter(l => l.org_id === orgId || l.org_id === 'org-demo-123');
+
+  // Search filter across multiple fields
+  if (search && typeof search === 'string' && search.trim() !== '') {
+    const q = search.toLowerCase().trim();
+    leads = leads.filter(l => 
+      l.full_name.toLowerCase().includes(q) ||
+      l.company_name.toLowerCase().includes(q) ||
+      l.job_title.toLowerCase().includes(q) ||
+      l.city.toLowerCase().includes(q) ||
+      l.country_name.toLowerCase().includes(q) ||
+      l.email.toLowerCase().includes(q) ||
+      l.contact_number.includes(q) ||
+      l.skills.some(s => s.toLowerCase().includes(q))
+    );
+  }
+
+  // Pipeline stage filter
+  if (status && status !== 'all') {
+    leads = leads.filter(l => l.status === status);
+  }
+
+  // Seniority filter
+  if (seniority && seniority !== 'all') {
+    const senStr = (seniority as string).toLowerCase();
+    leads = leads.filter(l => 
+      l.job_seniority_level.some(s => s.toLowerCase().includes(senStr)) ||
+      l.job_title.toLowerCase().includes(senStr)
+    );
+  }
+
+  // Country filter
+  if (country && country !== 'all') {
+    leads = leads.filter(l => l.country_name.toLowerCase() === (country as string).toLowerCase());
+  }
+
+  // Missing data filter (e.g. leads missing phone or email for manual enrichment)
+  if (missing_field === 'phone') {
+    leads = leads.filter(l => !l.contact_number || l.contact_number.trim() === '');
+  } else if (missing_field === 'email') {
+    leads = leads.filter(l => !l.email || l.email.trim() === '');
+  } else if (missing_field === 'both') {
+    leads = leads.filter(l => (!l.contact_number || l.contact_number.trim() === '') && (!l.email || l.email.trim() === ''));
+  }
+
+  // Sorting
+  leads.sort((a, b) => {
+    let comparison = 0;
+    if (sort_by === 'score') {
+      comparison = b.score - a.score;
+    } else if (sort_by === 'name') {
+      comparison = a.full_name.localeCompare(b.full_name);
+    } else if (sort_by === 'company') {
+      comparison = a.company_name.localeCompare(b.company_name);
+    } else if (sort_by === 'created_at') {
+      comparison = new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    } else if (sort_by === 'row_num') {
+      comparison = (a.row_num || 0) - (b.row_num || 0);
+    }
+    return order === 'asc' ? -comparison : comparison;
+  });
+
+  const total = leads.length;
+  const pageNum = Math.max(1, parseInt(page as string, 10) || 1);
+  const limitNum = Math.max(1, parseInt(limit as string, 10) || 50);
+  const offset = (pageNum - 1) * limitNum;
+  const paginatedLeads = leads.slice(offset, offset + limitNum);
+
+  res.json({
+    success: true,
+    total,
+    page: pageNum,
+    limit: limitNum,
+    total_pages: Math.ceil(total / limitNum),
+    leads: paginatedLeads
+  });
+});
+
+// GET LEADS STATS & FUNNEL METRICS
+apiRouter.get('/leads/stats', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  const leads = Array.from(dbStore.leads.values()).filter(l => l.org_id === orgId || l.org_id === 'org-demo-123');
+
+  const statusCounts: Record<string, number> = {
+    new: 0,
+    contacted: 0,
+    meeting_scheduled: 0,
+    qualified: 0,
+    proposal: 0,
+    won: 0,
+    unqualified: 0
+  };
+
+  const seniorityCounts: Record<string, number> = {
+    cxo_owner: 0,
+    director_vp: 0,
+    manager: 0,
+    other: 0
+  };
+
+  const countryCounts: Record<string, number> = {};
+  let totalScore = 0;
+  let hasPhoneCount = 0;
+  let hasEmailCount = 0;
+
+  leads.forEach(lead => {
+    if (statusCounts[lead.status] !== undefined) {
+      statusCounts[lead.status]++;
+    }
+
+    const sen = lead.job_seniority_level.map(s => s.toLowerCase()).join(' ');
+    const title = lead.job_title.toLowerCase();
+    if (sen.includes('owner') || sen.includes('cxo') || title.includes('chief') || title.includes('founder') || title.includes('president') || title.includes('ceo')) {
+      seniorityCounts.cxo_owner++;
+    } else if (sen.includes('director') || sen.includes('vp') || sen.includes('partner') || title.includes('director')) {
+      seniorityCounts.director_vp++;
+    } else if (sen.includes('manager') || title.includes('manager')) {
+      seniorityCounts.manager++;
+    } else {
+      seniorityCounts.other++;
+    }
+
+    const c = lead.country_name || 'Unspecified';
+    countryCounts[c] = (countryCounts[c] || 0) + 1;
+
+    totalScore += lead.score;
+    if (lead.contact_number && lead.contact_number.trim() !== '') hasPhoneCount++;
+    if (lead.email && lead.email.trim() !== '') hasEmailCount++;
+  });
+
+  const avgScore = leads.length > 0 ? Math.round(totalScore / leads.length) : 0;
+
+  res.json({
+    success: true,
+    total_leads: leads.length,
+    status_counts: statusCounts,
+    seniority_counts: seniorityCounts,
+    country_counts: countryCounts,
+    avg_quality_score: avgScore,
+    has_phone_count: hasPhoneCount,
+    has_email_count: hasEmailCount,
+    needs_manual_enrichment: leads.length - Math.min(hasPhoneCount, hasEmailCount)
+  });
+});
+
+// IMPORT LEADS FROM CSV CONTENT OR JSON WITH DEDUPLICATION & IMPORT LOGGING
+apiRouter.post('/leads/import', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  const { csv_content, leads: rawLeads, strategy = 'merge', source_name = 'CSV File Upload' } = req.body;
+
+  let leadsToProcess: Lead[] = [];
+
+  if (csv_content && typeof csv_content === 'string') {
+    leadsToProcess = parseCsvLeads(csv_content, orgId);
+  } else if (Array.isArray(rawLeads)) {
+    leadsToProcess = rawLeads.map((item: any, idx: number) => {
+      const id = item.prospect_id ? `lead-${item.prospect_id.substring(0, 12)}` : (item.id || `lead-${uuidv4().substring(0, 10)}`);
+      const lead: Lead = {
+        id,
+        org_id: orgId,
+        prospect_id: item.prospect_id || undefined,
+        business_id: item.business_id || undefined,
+        row_num: item.row_num || idx + 1,
+        first_name: item.first_name || item.prospect_first_name || '',
+        last_name: item.last_name || item.prospect_last_name || '',
+        full_name: item.full_name || item.prospect_full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || 'Unknown Prospect',
+        email: item.email || '',
+        contact_number: item.contact_number || '',
+        country_name: item.country_name || item.prospect_country_name || '',
+        region_name: item.region_name || item.prospect_region_name || '',
+        city: item.city || item.prospect_city || '',
+        linkedin_url: item.linkedin_url || item.prospect_linkedin || '',
+        experience: Array.isArray(item.experience) ? item.experience : (Array.isArray(item.prospect_experience) ? item.prospect_experience : []),
+        skills: Array.isArray(item.skills) ? item.skills : (Array.isArray(item.prospect_skills) ? item.prospect_skills : []),
+        interests: Array.isArray(item.interests) ? item.interests : (Array.isArray(item.prospect_interests) ? item.prospect_interests : []),
+        company_name: item.company_name || item.prospect_company_name || '',
+        company_website: item.company_website || item.prospect_company_website || '',
+        company_linkedin: item.company_linkedin || item.prospect_company_linkedin || '',
+        job_department: item.job_department || item.prospect_job_department || '',
+        job_seniority_level: Array.isArray(item.job_seniority_level) ? item.job_seniority_level : (Array.isArray(item.prospect_job_seniority_level) ? item.prospect_job_seniority_level : []),
+        job_title: item.job_title || item.prospect_job_title || '',
+        status: item.status || 'new',
+        score: item.score || 50,
+        notes: item.notes || '',
+        created_at: item.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      lead.score = calculateLeadScore(lead);
+      return lead;
+    });
+  }
+
+  if (leadsToProcess.length === 0) {
+    return res.status(400).json({ success: false, error: 'No valid lead records parsed from provided data.' });
+  }
+
+  // Deduplication index building
+  const existingLeads = Array.from(dbStore.leads.values()).filter(l => l.org_id === orgId || l.org_id === 'org-demo-123');
+  const prospectIdIndex = new Map<string, Lead>();
+  const linkedinIndex = new Map<string, Lead>();
+  const nameCompanyIndex = new Map<string, Lead>();
+
+  existingLeads.forEach(lead => {
+    if (lead.prospect_id) prospectIdIndex.set(lead.prospect_id, lead);
+    if (lead.linkedin_url && lead.linkedin_url.trim() !== '') {
+      const cleanLi = lead.linkedin_url.toLowerCase().replace(/https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, '');
+      if (cleanLi) linkedinIndex.set(cleanLi, lead);
+    }
+    const ncKey = `${lead.full_name.toLowerCase().trim()}|${lead.company_name.toLowerCase().trim()}`;
+    if (ncKey.length > 2) nameCompanyIndex.set(ncKey, lead);
+  });
+
+  let importedCount = 0;
+  let updatedCount = 0;
+  let skippedCount = 0;
+  const processedLeads: Lead[] = [];
+
+  leadsToProcess.forEach(newLead => {
+    let existingMatch: Lead | undefined = undefined;
+
+    if (newLead.prospect_id && prospectIdIndex.has(newLead.prospect_id)) {
+      existingMatch = prospectIdIndex.get(newLead.prospect_id);
+    } else if (newLead.linkedin_url && newLead.linkedin_url.trim() !== '') {
+      const cleanLi = newLead.linkedin_url.toLowerCase().replace(/https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, '');
+      if (cleanLi && linkedinIndex.has(cleanLi)) {
+        existingMatch = linkedinIndex.get(cleanLi);
+      }
+    }
+
+    if (!existingMatch) {
+      const ncKey = `${newLead.full_name.toLowerCase().trim()}|${newLead.company_name.toLowerCase().trim()}`;
+      if (nameCompanyIndex.has(ncKey)) {
+        existingMatch = nameCompanyIndex.get(ncKey);
+      }
+    }
+
+    if (existingMatch) {
+      if (strategy === 'skip') {
+        skippedCount++;
+        return;
+      }
+
+      if (strategy === 'merge') {
+        // Merge new non-empty details into existing lead
+        let fieldsChanged: string[] = [];
+        if (newLead.job_title && newLead.job_title !== existingMatch.job_title) {
+          existingMatch.job_title = newLead.job_title;
+          fieldsChanged.push('job_title');
+        }
+        if (newLead.company_name && newLead.company_name !== existingMatch.company_name) {
+          existingMatch.company_name = newLead.company_name;
+          fieldsChanged.push('company_name');
+        }
+        if (newLead.company_website && !existingMatch.company_website) {
+          existingMatch.company_website = newLead.company_website;
+          fieldsChanged.push('company_website');
+        }
+        if (newLead.skills && newLead.skills.length > 0 && existingMatch.skills.length === 0) {
+          existingMatch.skills = newLead.skills;
+          fieldsChanged.push('skills');
+        }
+        if (newLead.experience && newLead.experience.length > 0 && existingMatch.experience.length === 0) {
+          existingMatch.experience = newLead.experience;
+          fieldsChanged.push('experience');
+        }
+
+        existingMatch.score = calculateLeadScore(existingMatch);
+        existingMatch.updated_at = new Date().toISOString();
+        dbStore.leads.set(existingMatch.id, existingMatch);
+
+        if (fieldsChanged.length > 0) {
+          const actId = uuidv4();
+          dbStore.leadActivities.set(actId, {
+            id: actId,
+            lead_id: existingMatch.id,
+            org_id: orgId,
+            type: 'field_update',
+            summary: `Merged fields from ${source_name}: ${fieldsChanged.join(', ')}`,
+            performed_by: 'CSV Importer',
+            created_at: new Date().toISOString()
+          });
+        }
+
+        updatedCount++;
+        processedLeads.push(existingMatch);
+        return;
+      }
+
+      if (strategy === 'overwrite') {
+        newLead.id = existingMatch.id;
+        newLead.org_id = orgId;
+        newLead.updated_at = new Date().toISOString();
+        dbStore.leads.set(newLead.id, newLead);
+
+        const actId = uuidv4();
+        dbStore.leadActivities.set(actId, {
+          id: actId,
+          lead_id: newLead.id,
+          org_id: orgId,
+          type: 'field_update',
+          summary: `Overwritten from ${source_name}`,
+          performed_by: 'CSV Importer',
+          created_at: new Date().toISOString()
+        });
+
+        updatedCount++;
+        processedLeads.push(newLead);
+        return;
+      }
+    }
+
+    // New Lead Insertion
+    newLead.org_id = orgId;
+    dbStore.leads.set(newLead.id, newLead);
+
+    // Initial Import Audit Log
+    const actId = uuidv4();
+    dbStore.leadActivities.set(actId, {
+      id: actId,
+      lead_id: newLead.id,
+      org_id: orgId,
+      type: 'import',
+      summary: `Lead imported from ${source_name}`,
+      content: `Record initialized for ${newLead.full_name} (${newLead.job_title || 'No Title'} at ${newLead.company_name || 'No Company'}). Missing contact numbers/emails left blank for manual entry.`,
+      performed_by: 'CSV Importer',
+      created_at: new Date().toISOString()
+    });
+
+    // Update in-memory indexes
+    if (newLead.prospect_id) prospectIdIndex.set(newLead.prospect_id, newLead);
+    if (newLead.linkedin_url) {
+      const cleanLi = newLead.linkedin_url.toLowerCase().replace(/https?:\/\/(www\.)?linkedin\.com\/in\//, '').replace(/\/$/, '');
+      if (cleanLi) linkedinIndex.set(cleanLi, newLead);
+    }
+    nameCompanyIndex.set(`${newLead.full_name.toLowerCase().trim()}|${newLead.company_name.toLowerCase().trim()}`, newLead);
+
+    importedCount++;
+    processedLeads.push(newLead);
+  });
+
+  dbStore.saveToDisk();
+
+  res.json({
+    success: true,
+    message: `Import completed. ${importedCount} leads added, ${updatedCount} merged/updated, ${skippedCount} duplicate skipped.`,
+    total_parsed: leadsToProcess.length,
+    imported_count: importedCount,
+    updated_count: updatedCount,
+    skipped_count: skippedCount,
+    leads: processedLeads.slice(0, 100)
+  });
+});
+
+// 1-CLICK SEED SAMPLE 100 LEADS
+apiRouter.post('/leads/seed-sample', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  dbStore.seedSampleLeads(orgId);
+  dbStore.saveToDisk();
+
+  const leads = Array.from(dbStore.leads.values()).filter(l => l.org_id === orgId || l.org_id === 'org-demo-123');
+
+  res.json({
+    success: true,
+    message: `Successfully loaded ${leads.length} prospect records from sample dataset.`,
+    count: leads.length,
+    leads: leads.slice(0, 50)
+  });
+});
+
+// GET SINGLE LEAD BY ID WITH ACTIVITY TIMELINE
+apiRouter.get('/leads/:id', (req: Request, res: Response) => {
+  const leadId = req.params.id;
+  const lead = dbStore.leads.get(leadId);
+
+  if (!lead) {
+    return res.status(404).json({ success: false, error: 'Lead record not found.' });
+  }
+
+  const activities = Array.from(dbStore.leadActivities.values())
+    .filter(a => a.lead_id === leadId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  res.json({
+    success: true,
+    lead,
+    activities
+  });
+});
+
+// PATCH / UPDATE SINGLE LEAD (MANUAL RECORD EDITING WITH AUTOMATIC FIELD CORRECTION AUDIT LOG)
+apiRouter.patch('/leads/:id', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  const leadId = req.params.id;
+  const updates = req.body;
+  const performedBy = (req.body.performed_by as string) || (req.headers['x-user-name'] as string) || 'Admin Agent';
+
+  const lead = dbStore.leads.get(leadId);
+  if (!lead) {
+    return res.status(404).json({ success: false, error: 'Lead record not found.' });
+  }
+
+  const fieldKeys: (keyof Lead)[] = [
+    'first_name',
+    'last_name',
+    'full_name',
+    'email',
+    'contact_number',
+    'country_name',
+    'region_name',
+    'city',
+    'linkedin_url',
+    'company_name',
+    'company_website',
+    'company_linkedin',
+    'job_department',
+    'job_title',
+    'status',
+    'notes'
+  ];
+
+  const loggedChanges: LeadActivityLog[] = [];
+
+  fieldKeys.forEach(key => {
+    if (updates[key] !== undefined && updates[key] !== lead[key]) {
+      const oldVal = String(lead[key] || '');
+      const newVal = String(updates[key] || '');
+
+      // Apply update
+      (lead as any)[key] = updates[key];
+
+      // Auto create audit log for this field update/correction
+      const actId = uuidv4();
+      const isStatus = key === 'status';
+      const changeActivity: LeadActivityLog = {
+        id: actId,
+        lead_id: lead.id,
+        org_id: orgId,
+        type: isStatus ? 'status_change' : 'field_update',
+        field_name: key as string,
+        old_value: oldVal || '(empty)',
+        new_value: newVal || '(cleared)',
+        summary: isStatus 
+          ? `Pipeline stage changed from "${oldVal}" to "${newVal}"`
+          : `Detail corrected: "${key}" updated from "${oldVal || '(empty)'}" to "${newVal}"`,
+        content: `Manual individual record update performed by ${performedBy}.`,
+        performed_by: performedBy,
+        created_at: new Date().toISOString()
+      };
+
+      dbStore.leadActivities.set(actId, changeActivity);
+      loggedChanges.push(changeActivity);
+    }
+  });
+
+  // Array fields handling (skills, experience, interests)
+  ['skills', 'experience', 'interests', 'job_seniority_level'].forEach(arrKey => {
+    if (Array.isArray(updates[arrKey])) {
+      (lead as any)[arrKey] = updates[arrKey];
+    }
+  });
+
+  // Re-sync full_name if first_name or last_name modified
+  if (updates.first_name || updates.last_name) {
+    lead.full_name = `${lead.first_name} ${lead.last_name}`.trim();
+  }
+
+  // Recalculate quality score
+  lead.score = calculateLeadScore(lead);
+  lead.updated_at = new Date().toISOString();
+
+  dbStore.leads.set(lead.id, lead);
+  dbStore.saveToDisk();
+
+  res.json({
+    success: true,
+    message: `Lead updated successfully. ${loggedChanges.length} field corrections audited.`,
+    lead,
+    logged_changes: loggedChanges
+  });
+});
+
+// DELETE SINGLE LEAD
+apiRouter.delete('/leads/:id', (req: Request, res: Response) => {
+  const leadId = req.params.id;
+  const deleted = dbStore.leads.delete(leadId);
+
+  if (deleted) {
+    // Also clean up activity logs for this lead
+    Array.from(dbStore.leadActivities.entries()).forEach(([id, act]) => {
+      if (act.lead_id === leadId) {
+        dbStore.leadActivities.delete(id);
+      }
+    });
+    dbStore.saveToDisk();
+    res.json({ success: true, message: 'Lead and associated activity logs deleted.' });
+  } else {
+    res.status(404).json({ success: false, error: 'Lead not found.' });
+  }
+});
+
+// CLEAR / BULK DELETE ALL LEADS FOR ORG
+apiRouter.delete('/leads', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  let count = 0;
+
+  Array.from(dbStore.leads.entries()).forEach(([id, lead]) => {
+    if (lead.org_id === orgId || lead.org_id === 'org-demo-123') {
+      dbStore.leads.delete(id);
+      count++;
+    }
+  });
+
+  Array.from(dbStore.leadActivities.entries()).forEach(([id, act]) => {
+    if (act.org_id === orgId || act.org_id === 'org-demo-123') {
+      dbStore.leadActivities.delete(id);
+    }
+  });
+
+  dbStore.saveToDisk();
+  res.json({ success: true, message: `Cleared ${count} leads from workspace database.` });
+});
+
+// GET COMMUNICATION ACTIVITY LOGS FOR LEAD
+apiRouter.get('/leads/:id/activities', (req: Request, res: Response) => {
+  const leadId = req.params.id;
+  const activities = Array.from(dbStore.leadActivities.values())
+    .filter(a => a.lead_id === leadId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  res.json({
+    success: true,
+    activities
+  });
+});
+
+// POST / LOG NEW OMNICHANNEL COMMUNICATION (CALL, EMAIL, WHATSAPP, MEETING, NOTE)
+apiRouter.post('/leads/:id/activities', (req: Request, res: Response) => {
+  const orgId = getOrgId(req);
+  const leadId = req.params.id;
+  const { type, summary, content, outcome, duration_seconds, performed_by } = req.body;
+
+  const lead = dbStore.leads.get(leadId);
+  if (!lead) {
+    return res.status(404).json({ success: false, error: 'Lead not found.' });
+  }
+
+  const actId = uuidv4();
+  const newActivity: LeadActivityLog = {
+    id: actId,
+    lead_id: leadId,
+    org_id: orgId,
+    type: type || 'note',
+    summary: summary || `${(type || 'Activity').toUpperCase()} interaction logged`,
+    content: content || '',
+    outcome: outcome || undefined,
+    duration_seconds: duration_seconds ? parseInt(duration_seconds, 10) : undefined,
+    performed_by: performed_by || 'Agent',
+    created_at: new Date().toISOString()
+  };
+
+  dbStore.leadActivities.set(actId, newActivity);
+
+  // Auto-progress stage to 'contacted' if still in 'new'
+  if (lead.status === 'new' && ['call', 'email', 'whatsapp', 'meeting'].includes(type)) {
+    lead.status = 'contacted';
+    lead.updated_at = new Date().toISOString();
+    dbStore.leads.set(lead.id, lead);
+  }
+
+  dbStore.saveToDisk();
+
+  res.json({
+    success: true,
+    message: `${type ? type.toUpperCase() : 'Activity'} logged successfully to lead timeline.`,
+    activity: newActivity,
+    lead_status: lead.status
+  });
+});
+
+// SOLOMON AI LEAD OUTREACH PITCH GENERATOR
+apiRouter.post('/leads/:id/ai-pitch', (req: Request, res: Response) => {
+  const leadId = req.params.id;
+  const { channel = 'email', tone = 'professional', custom_goal } = req.body;
+
+  const lead = dbStore.leads.get(leadId);
+  if (!lead) {
+    return res.status(404).json({ success: false, error: 'Lead not found.' });
+  }
+
+  const firstName = lead.first_name || lead.full_name.split(' ')[0] || 'there';
+  const company = lead.company_name || 'your company';
+  const title = lead.job_title || 'leader';
+  const topSkill = lead.skills[0] || 'growth & leadership';
+  const interest = lead.interests[0] || 'innovation';
+
+  let subject = '';
+  let body = '';
+
+  if (channel === 'email') {
+    subject = `Quick question regarding ${company}’s customer experience workflow`;
+    body = `Hi ${firstName},
+
+I came across your work as ${title} at ${company} and was impressed by your focus on ${topSkill}.
+
+At Quadrace CRM, we help high-growth leaders unify WhatsApp, Instagram, Email, and Web Chat into an autonomous AI workspace powered by Solomon AI—cutting support resolution time by 78% while accelerating qualified pipeline.
+
+${custom_goal ? `Specifically for ${company}: ${custom_goal}\n\n` : ''}Would you be open to a brief 10-minute chat this Thursday to see how similar teams are driving 3x customer retention?
+
+Best regards,
+Alex & The Quadrace CRM Team`;
+  } else if (channel === 'whatsapp') {
+    body = `Hi ${firstName}! Hope you're having a great week at ${company}. 
+
+Saw your background in ${topSkill} and wanted to share a quick 1-min interactive demo showing how Solomon AI automates omnichannel customer conversations across WhatsApp and Web Chat. 
+
+Would you like me to send over the demo link?`;
+  } else {
+    // LinkedIn connection / InMail pitch
+    subject = `Connecting with ${company} leadership`;
+    body = `Hi ${firstName}, I've been following ${company}'s progress in your space. As ${title}, you might find our new AI-driven omnichannel support platform interesting. Let's connect!`;
+  }
+
+  res.json({
+    success: true,
+    channel,
+    subject,
+    pitch: body,
+    lead_name: lead.full_name,
+    company: lead.company_name
+  });
+});
+

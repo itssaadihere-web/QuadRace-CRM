@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   ChevronRight,
   LogOut,
-  ArrowRight
+  ArrowRight,
+  Users
 } from 'lucide-react';
 
 const API_BASE = 'http://localhost:5000';
@@ -219,6 +220,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   // PROTECTED DASHBOARD LAYOUT WITH EXPANDED 280PX SIDEBAR
   const navItems = [
     { name: 'Live Omnichannel Inbox', href: '/inbox', icon: MessageSquare, badge: 'Realtime' },
+    { name: 'Leads & Pipeline CRM', href: '/leads', icon: Users, badge: '100+' },
     { name: 'Vertical Onboarding', href: '/onboarding', icon: Sparkles, badge: 'Wizard' },
     { name: 'Unanswered Gaps Hub', href: '/gaps', icon: HelpCircle, badge: '1-Click' },
     { name: 'Knowledge Base (RAG)', href: '/knowledge', icon: BookOpen },
