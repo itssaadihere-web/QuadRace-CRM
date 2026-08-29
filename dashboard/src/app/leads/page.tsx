@@ -170,6 +170,10 @@ export default function LeadsPage() {
   const [sortBy, setSortBy] = useState<string>('score');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Table Pagination & Density State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(25);
+
   // Modals & Drawers
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -327,6 +331,19 @@ export default function LeadsPage() {
       return true;
     });
   }, [leads, searchQuery, statusFilter, seniorityFilter, missingFilter]);
+
+  // Reset pagination on search or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, seniorityFilter, missingFilter, pageSize, sortBy, sortOrder]);
+
+  // Paginated Sliced Leads for Table View
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / pageSize));
+  const paginatedLeads = useMemo(() => {
+    if (pageSize === -1) return filteredLeads;
+    const start = (currentPage - 1) * pageSize;
+    return filteredLeads.slice(start, start + pageSize);
+  }, [filteredLeads, currentPage, pageSize]);
 
   // Open Lead Details Drawer & fetch activities
   const handleOpenLead = async (lead: Lead) => {
@@ -948,33 +965,45 @@ export default function LeadsPage() {
         </div>
       ) : viewMode === 'list' ? (
 
-        /* ==================== LIST / TABLE VIEW ==================== */
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
+        /* ==================== OPTIMIZED LIST / TABLE VIEW ==================== */
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+          <div className="overflow-x-auto max-h-[calc(100vh-280px)] overflow-y-auto">
             <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
-                  <th className="py-3.5 px-4">Prospect & Seniority</th>
-                  <th className="py-3.5 px-4">Company & Website</th>
-                  <th className="py-3.5 px-4">Contact Number</th>
-                  <th className="py-3.5 px-4">Email Address</th>
-                  <th className="py-3.5 px-4">Location</th>
-                  <th className="py-3.5 px-4 text-center">Score</th>
-                  <th className="py-3.5 px-4">Pipeline Stage</th>
-                  <th className="py-3.5 px-4 text-right">Omnichannel Actions</th>
+              <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs z-10 shadow-2xs">
+                <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                  <th className="py-3 px-3.5 min-w-[220px]">Prospect & Title</th>
+                  <th className="py-3 px-3.5 min-w-[170px]">Company & Web</th>
+                  <th className="py-3 px-3.5 min-w-[180px]">Contact & WhatsApp</th>
+                  <th className="py-3 px-3.5 min-w-[170px]">Email Address</th>
+                  <th className="py-3 px-3.5 min-w-[140px]">Location</th>
+                  <th className="py-3 px-3.5 text-center min-w-[70px]">Score</th>
+                  <th className="py-3 px-3.5 min-w-[140px]">Pipeline Stage</th>
+                  <th className="py-3 px-3.5 text-right min-w-[130px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {filteredLeads.map((lead) => {
+                {paginatedLeads.map((lead) => {
                   const stageInfo = PIPELINE_STAGES.find(s => s.id === lead.status) || PIPELINE_STAGES[0];
                   const initials = lead.full_name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'LP';
 
+                  const phoneArray = lead.contact_number 
+                    ? lead.contact_number.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean)
+                    : [];
+                  const primaryPhone = phoneArray[0] || '';
+                  const extraPhonesCount = phoneArray.length - 1;
+
+                  const emailArray = lead.email 
+                    ? lead.email.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean)
+                    : [];
+                  const primaryEmail = emailArray[0] || '';
+                  const extraEmailsCount = emailArray.length - 1;
+
                   return (
-                    <tr key={lead.id} className="hover:bg-slate-50/80 transition group">
+                    <tr key={lead.id} className="hover:bg-slate-50/90 transition group h-14">
                       
                       {/* 1. Prospect Full Name, Avatar Picture, Job Title & LinkedIn */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
+                      <td className="py-2.5 px-3.5">
+                        <div className="flex items-center gap-2.5">
                           {lead.avatar_url ? (
                             <img
                               src={lead.avatar_url}
@@ -982,18 +1011,19 @@ export default function LeadsPage() {
                               onError={(e) => {
                                 e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.full_name || 'Lead')}&background=0F2B1D&color=C59B27&bold=true&size=128`;
                               }}
-                              className="w-8 h-8 rounded-full object-cover border border-[#C59B27]/50 shrink-0 shadow-2xs"
+                              className="w-7 h-7 rounded-full object-cover border border-[#C59B27]/60 shrink-0 shadow-2xs"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-[10px] shrink-0">
                               {initials}
                             </div>
                           )}
-                          <div>
-                            <div className="flex items-center gap-1.5">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 leading-tight">
                               <button
                                 onClick={() => handleOpenLead(lead)}
-                                className="font-bold text-slate-900 hover:text-[#0F2B1D] transition text-left"
+                                className="font-bold text-slate-900 hover:text-[#0F2B1D] transition truncate max-w-[140px] text-left"
+                                title={lead.full_name}
                               >
                                 {lead.full_name}
                               </button>
@@ -1002,14 +1032,14 @@ export default function LeadsPage() {
                                   href={lead.linkedin_url.startsWith('http') ? lead.linkedin_url : `https://${lead.linkedin_url}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-800"
+                                  className="text-blue-600 hover:text-blue-800 shrink-0"
                                   title="View LinkedIn Profile"
                                 >
-                                  <Linkedin className="w-3.5 h-3.5" />
+                                  <Linkedin className="w-3 h-3" />
                                 </a>
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-500 truncate max-w-[200px]" title={lead.job_title}>
+                            <div className="text-[10px] text-slate-500 truncate max-w-[160px]" title={lead.job_title}>
                               {lead.job_title || 'Executive'}
                             </div>
                           </div>
@@ -1017,104 +1047,107 @@ export default function LeadsPage() {
                       </td>
 
                       {/* 2. Business / Company */}
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                          <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span className="truncate max-w-[150px]">{lead.company_name || 'N/A'}</span>
+                      <td className="py-2.5 px-3.5">
+                        <div className="font-bold text-slate-800 flex items-center gap-1 leading-tight">
+                          <Building2 className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span className="truncate max-w-[130px]" title={lead.company_name}>{lead.company_name || 'N/A'}</span>
                         </div>
                         {lead.company_website && (
                           <a
                             href={lead.company_website.startsWith('http') ? lead.company_website : `https://${lead.company_website}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[11px] text-[#0F2B1D] hover:underline flex items-center gap-1 font-mono"
+                            className="text-[10px] text-[#0F2B1D] hover:underline flex items-center gap-0.5 font-mono truncate max-w-[130px]"
+                            title={lead.company_website}
                           >
-                            <Globe className="w-3 h-3 text-[#C59B27]" />
-                            {lead.company_website.replace(/^https?:\/\//, '')}
+                            <Globe className="w-2.5 h-2.5 text-[#C59B27] shrink-0" />
+                            <span className="truncate">{lead.company_website.replace(/^https?:\/\//, '')}</span>
                           </a>
                         )}
                       </td>
 
-                      {/* 3. Contact Number (with click-to-edit if blank) */}
-                      <td className="py-3 px-4">
-                        {lead.contact_number ? (
-                          <div className="space-y-1">
-                            {lead.contact_number.split(/[,;\n]+/).map((ph, idx) => {
-                              const cleanPh = ph.trim();
-                              if (!cleanPh) return null;
-                              return (
-                                <div key={idx} className="flex items-center gap-1.5 font-mono text-slate-900 text-[11px]">
-                                  <span>{cleanPh}</span>
-                                  <button
-                                    onClick={() => copyToClipboard(cleanPh, `ph-${lead.id}-${idx}`)}
-                                    className="text-slate-400 hover:text-slate-600 p-0.5"
-                                    title="Copy Phone"
-                                  >
-                                    {copiedId === `ph-${lead.id}-${idx}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                                  </button>
-                                  <button
-                                    onClick={() => openDirectWhatsApp(cleanPh)}
-                                    className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0.5 rounded transition"
-                                    title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
-                                  >
-                                    <MessageSquare className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              );
-                            })}
+                      {/* 3. Contact Number & WhatsApp (Inline Compact) */}
+                      <td className="py-2.5 px-3.5">
+                        {primaryPhone ? (
+                          <div className="flex items-center gap-1 font-mono text-slate-900 text-[11px] leading-tight">
+                            <span className="truncate max-w-[110px]" title={phoneArray.join(', ')}>{primaryPhone}</span>
+                            <button
+                              onClick={() => copyToClipboard(primaryPhone, `ph-${lead.id}`)}
+                              className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0"
+                              title="Copy Phone"
+                            >
+                              {copiedId === `ph-${lead.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                            <button
+                              onClick={() => openDirectWhatsApp(primaryPhone)}
+                              className="text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0.5 rounded transition shrink-0"
+                              title="Open WhatsApp Chat (Mobile / Web / Desktop)"
+                            >
+                              <MessageSquare className="w-3 h-3" />
+                            </button>
+                            {extraPhonesCount > 0 && (
+                              <button
+                                onClick={() => handleOpenLead(lead)}
+                                className="px-1.5 py-0.2 bg-emerald-50 text-emerald-700 text-[9px] font-bold rounded-md border border-emerald-200 hover:bg-emerald-100 transition shrink-0"
+                                title={`Additional Numbers: ${phoneArray.slice(1).join(', ')} (Click to view)`}
+                              >
+                                +{extraPhonesCount}
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <button
                             onClick={() => handleOpenLead(lead)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200 hover:bg-amber-100 transition"
+                            className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200 hover:bg-amber-100 transition"
                           >
-                            <Plus className="w-3 h-3" /> Add Phone
+                            <Plus className="w-2.5 h-2.5" /> Add Phone
                           </button>
                         )}
                       </td>
 
-                      {/* 4. Email Address */}
-                      <td className="py-3 px-4">
-                        {lead.email ? (
-                          <div className="space-y-1">
-                            {lead.email.split(/[,;\n]+/).map((em, idx) => {
-                              const cleanEm = em.trim();
-                              if (!cleanEm) return null;
-                              return (
-                                <div key={idx} className="flex items-center gap-1.5 font-mono text-slate-900 text-[11px]">
-                                  <span className="truncate max-w-[150px]" title={cleanEm}>{cleanEm}</span>
-                                  <button
-                                    onClick={() => copyToClipboard(cleanEm, `em-${lead.id}-${idx}`)}
-                                    className="text-slate-400 hover:text-slate-600 p-0.5"
-                                    title="Copy Email"
-                                  >
-                                    {copiedId === `em-${lead.id}-${idx}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                                  </button>
-                                </div>
-                              );
-                            })}
+                      {/* 4. Email Address (Inline Compact) */}
+                      <td className="py-2.5 px-3.5">
+                        {primaryEmail ? (
+                          <div className="flex items-center gap-1 font-mono text-slate-900 text-[11px] leading-tight">
+                            <span className="truncate max-w-[120px]" title={emailArray.join(', ')}>{primaryEmail}</span>
+                            <button
+                              onClick={() => copyToClipboard(primaryEmail, `em-${lead.id}`)}
+                              className="text-slate-400 hover:text-slate-600 p-0.5 shrink-0"
+                              title="Copy Email"
+                            >
+                              {copiedId === `em-${lead.id}` ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                            {extraEmailsCount > 0 && (
+                              <button
+                                onClick={() => handleOpenLead(lead)}
+                                className="px-1.5 py-0.2 bg-blue-50 text-blue-700 text-[9px] font-bold rounded-md border border-blue-200 hover:bg-blue-100 transition shrink-0"
+                                title={`Additional Emails: ${emailArray.slice(1).join(', ')} (Click to view)`}
+                              >
+                                +{extraEmailsCount}
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <button
                             onClick={() => handleOpenLead(lead)}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200 hover:bg-blue-100 transition"
+                            className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200 hover:bg-blue-100 transition"
                           >
-                            <Plus className="w-3 h-3" /> Add Email
+                            <Plus className="w-2.5 h-2.5" /> Add Email
                           </button>
                         )}
                       </td>
 
                       {/* 5. Location */}
-                      <td className="py-3 px-4 text-slate-600">
-                        <div className="flex items-center gap-1 truncate max-w-[150px]">
-                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <td className="py-2.5 px-3.5 text-slate-600">
+                        <div className="flex items-center gap-1 truncate max-w-[130px] text-[11px]" title={lead.city ? `${lead.city}, ${lead.country_name}` : lead.country_name}>
+                          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                           <span className="truncate">{lead.city ? `${lead.city}, ${lead.country_name}` : lead.country_name || 'Global'}</span>
                         </div>
                       </td>
 
                       {/* 6. Score */}
-                      <td className="py-3 px-4 text-center">
-                        <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-extrabold ${
+                      <td className="py-2.5 px-3.5 text-center">
+                        <span className={`inline-flex items-center justify-center px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
                           lead.score >= 80 ? 'bg-emerald-100 text-emerald-800' : lead.score >= 60 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {lead.score}
@@ -1122,11 +1155,11 @@ export default function LeadsPage() {
                       </td>
 
                       {/* 7. Pipeline Stage Dropdown */}
-                      <td className="py-3 px-4">
+                      <td className="py-2.5 px-3.5">
                         <select
                           value={lead.status}
                           onChange={(e) => handleStageChange(lead.id, e.target.value)}
-                          className={`text-[11px] font-bold px-2 py-1 rounded-lg border focus:outline-none cursor-pointer ${stageInfo.color}`}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border focus:outline-none cursor-pointer w-full max-w-[130px] truncate ${stageInfo.color}`}
                         >
                           {PIPELINE_STAGES.map(s => (
                             <option key={s.id} value={s.id} className="bg-white text-slate-800">
@@ -1137,15 +1170,15 @@ export default function LeadsPage() {
                       </td>
 
                       {/* 8. Quick Omnichannel Communication Actions */}
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="py-2.5 px-3.5 text-right">
+                        <div className="flex items-center justify-end gap-0.5">
                           {/* Call Button */}
                           <button
                             onClick={() => {
                               setCommModal({ isOpen: true, type: 'call', lead });
                               setCallNotes('');
                             }}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition"
+                            className="p-1 rounded-md text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition"
                             title="Log Call"
                           >
                             <PhoneCall className="w-3.5 h-3.5" />
@@ -1157,7 +1190,7 @@ export default function LeadsPage() {
                               setCommModal({ isOpen: true, type: 'email', lead });
                               handleGenerateAIPitch('email');
                             }}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 transition"
+                            className="p-1 rounded-md text-slate-400 hover:text-blue-700 hover:bg-blue-50 transition"
                             title="Draft / Send Email"
                           >
                             <Mail className="w-3.5 h-3.5" />
@@ -1173,8 +1206,8 @@ export default function LeadsPage() {
                                 handleGenerateAIPitch('whatsapp');
                               }
                             }}
-                            className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition"
-                            title="Open WhatsApp Chat (Mobile App / Web / Desktop)"
+                            className="p-1 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition"
+                            title="Open WhatsApp Chat (Mobile / Web / Desktop)"
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
                           </button>
@@ -1182,7 +1215,7 @@ export default function LeadsPage() {
                           {/* Detail Profile Drawer Button */}
                           <button
                             onClick={() => handleOpenLead(lead)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-[#0F2B1D] hover:bg-slate-100 transition ml-1"
+                            className="p-1 rounded-md text-slate-400 hover:text-[#0F2B1D] hover:bg-slate-100 transition"
                             title="Open Profile & History"
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -1197,11 +1230,87 @@ export default function LeadsPage() {
             </table>
           </div>
 
-          {/* Table Footer with Count Summary */}
-          <div className="py-3 px-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
-            <div>Showing {filteredLeads.length} of {leads.length} total leads</div>
-            <div className="flex items-center gap-1.5">
-              <span>All 100 sample records fully indexed and deduplicated</span>
+          {/* Optimized Executive Pagination Bar */}
+          <div className="py-3 px-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 font-medium">
+            <div className="flex items-center gap-3">
+              <span>
+                Showing <strong className="text-slate-900 font-bold">{filteredLeads.length > 0 ? (currentPage - 1) * pageSize + 1 : 0}</strong> to <strong className="text-slate-900 font-bold">{Math.min(currentPage * pageSize, filteredLeads.length)}</strong> of <strong className="text-slate-900 font-bold">{filteredLeads.length}</strong> leads
+              </span>
+              <div className="flex items-center gap-1.5 border-l border-slate-200 pl-3">
+                <span className="text-slate-400 text-[11px]">Rows:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(parseInt(e.target.value, 10));
+                    setCurrentPage(1);
+                  }}
+                  className="px-2 py-0.5 bg-white border border-slate-200 rounded-md text-xs font-bold text-slate-700 focus:outline-none"
+                >
+                  <option value="15">15</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Page Buttons */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setCurrentPage(1)}
+                disabled={currentPage === 1}
+                className="px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-[11px] font-bold transition"
+                title="First Page"
+              >
+                « First
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1 rounded-md border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-[11px] font-bold transition flex items-center gap-1"
+              >
+                <ChevronLeft className="w-3 h-3" /> Prev
+              </button>
+
+              {/* Dynamic Page Number Pills */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                .map((p, idx, arr) => {
+                  const prevP = arr[idx - 1];
+                  const showEllipsis = prevP && p - prevP > 1;
+
+                  return (
+                    <span key={p} className="flex items-center">
+                      {showEllipsis && <span className="px-1 text-slate-400 text-[10px]">...</span>}
+                      <button
+                        onClick={() => setCurrentPage(p)}
+                        className={`min-w-[28px] h-7 px-1.5 rounded-md text-[11px] font-bold transition ${
+                          currentPage === p
+                            ? 'bg-[#0F2B1D] text-[#C59B27] shadow-xs'
+                            : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    </span>
+                  );
+                })}
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1 rounded-md border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-[11px] font-bold transition flex items-center gap-1"
+              >
+                Next <ChevronRight className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 text-[11px] font-bold transition"
+                title="Last Page"
+              >
+                Last »
+              </button>
             </div>
           </div>
         </div>
