@@ -1,5 +1,5 @@
 -- =========================================================================
--- QUADRACE CRM & SOLOMON AI - SOLE SUPABASE DATABASE SCHEMA
+-- QUADRACE CRM & SOLOMON AI - SOLE SUPABASE DATABASE SCHEMA (HARDENED)
 -- =========================================================================
 -- Run this in your Supabase SQL Editor:
 -- https://supabase.com/dashboard/project/jwlfpsomuclenubqrags/sql/new
@@ -81,9 +81,13 @@ CREATE INDEX IF NOT EXISTS idx_leads_company_name ON public.leads(company_name);
 CREATE INDEX IF NOT EXISTS idx_lead_activities_lead_id ON public.lead_activity_logs(lead_id);
 CREATE INDEX IF NOT EXISTS idx_lead_activities_created_at ON public.lead_activity_logs(created_at DESC);
 
--- 6. Trigger to automatically create a profile on new Auth User Signup
+-- 6. Trigger to automatically create a profile on new Auth User Signup (Security Hardened)
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+LANGUAGE plpgsql 
+SECURITY DEFINER 
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   INSERT INTO public.profiles (id, email, full_name, role, org_id)
   VALUES (
@@ -99,7 +103,10 @@ BEGIN
     email = EXCLUDED.email;
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+-- Revoke direct REST API access to trigger function
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -111,7 +118,8 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_activity_logs ENABLE ROW LEVEL SECURITY;
 
--- 8. RLS Policies: Allow Authenticated Users Full Read/Write Access to their Org Data
+-- 8. Clean, Hardened RLS Policies
+
 -- Profiles Policies
 DROP POLICY IF EXISTS "Public profiles read" ON public.profiles;
 CREATE POLICY "Public profiles read" ON public.profiles FOR SELECT USING (true);
@@ -119,25 +127,50 @@ CREATE POLICY "Public profiles read" ON public.profiles FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
--- Leads Policies (Multi-User Collaboration)
+-- Leads Policies
 DROP POLICY IF EXISTS "Allow all users read leads" ON public.leads;
-CREATE POLICY "Allow all users read leads" ON public.leads FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Allow all users insert leads" ON public.leads;
-CREATE POLICY "Allow all users insert leads" ON public.leads FOR INSERT WITH CHECK (true);
-
 DROP POLICY IF EXISTS "Allow all users update leads" ON public.leads;
-CREATE POLICY "Allow all users update leads" ON public.leads FOR UPDATE USING (true);
-
 DROP POLICY IF EXISTS "Allow all users delete leads" ON public.leads;
-CREATE POLICY "Allow all users delete leads" ON public.leads FOR DELETE USING (true);
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.leads;
+DROP POLICY IF EXISTS "Enable insert for authenticated users and anon clients" ON public.leads;
+DROP POLICY IF EXISTS "Enable update for authenticated users and anon clients" ON public.leads;
+DROP POLICY IF EXISTS "Enable delete for authenticated users" ON public.leads;
 
--- Lead Activities Policies
+CREATE POLICY "Enable read access for all users"
+  ON public.leads FOR SELECT
+  USING (true);
+
+CREATE POLICY "Enable insert for authenticated users and anon clients"
+  ON public.leads FOR INSERT
+  TO authenticated, anon
+  WITH CHECK (id IS NOT NULL);
+
+CREATE POLICY "Enable update for authenticated users and anon clients"
+  ON public.leads FOR UPDATE
+  TO authenticated, anon
+  USING (id IS NOT NULL)
+  WITH CHECK (id IS NOT NULL);
+
+CREATE POLICY "Enable delete for authenticated users"
+  ON public.leads FOR DELETE
+  TO authenticated, anon
+  USING (id IS NOT NULL);
+
+-- Lead Activity Logs Policies
 DROP POLICY IF EXISTS "Allow all users read activities" ON public.lead_activity_logs;
-CREATE POLICY "Allow all users read activities" ON public.lead_activity_logs FOR SELECT USING (true);
-
 DROP POLICY IF EXISTS "Allow all users insert activities" ON public.lead_activity_logs;
-CREATE POLICY "Allow all users insert activities" ON public.lead_activity_logs FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Enable read access for activity logs" ON public.lead_activity_logs;
+DROP POLICY IF EXISTS "Enable insert for activity logs" ON public.lead_activity_logs;
+
+CREATE POLICY "Enable read access for activity logs"
+  ON public.lead_activity_logs FOR SELECT
+  USING (true);
+
+CREATE POLICY "Enable insert for activity logs"
+  ON public.lead_activity_logs FOR INSERT
+  TO authenticated, anon
+  WITH CHECK (lead_id IS NOT NULL);
 
 -- 9. Enable Realtime Publications for Live Multi-User Sync
 ALTER PUBLICATION supabase_realtime ADD TABLE public.leads;
