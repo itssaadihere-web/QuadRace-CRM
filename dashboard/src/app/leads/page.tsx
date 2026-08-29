@@ -39,8 +39,12 @@ import {
   ExternalLink,
   ShieldCheck,
   Flame,
-  Check
+  Check,
+  LogOut,
+  User,
+  Radio
 } from 'lucide-react';
+import { supabase, Profile } from '@/lib/supabase';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '';
 
@@ -216,27 +220,83 @@ export default function LeadsPage() {
   const [copiedId, setCopiedId] = useState<string>('');
   const [successToast, setSuccessToast] = useState<string>('');
 
-  // Load Leads & Stats (with instant offline cache and Next.js built-in API)
+  // Supabase User & Team Session State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentProfile, setCurrentProfile] = useState<Profile | null>(null);
+  const [isSupabaseOnline, setIsSupabaseOnline] = useState<boolean>(true);
+
+  // Listen to Supabase Auth State
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => {
+            if (data) setCurrentProfile(data as Profile);
+          });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+      } else {
+        setCurrentUser(null);
+        setCurrentProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Supabase Realtime Multi-User Live Sync
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime:leads-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setLeads(prev => [payload.new as Lead, ...prev.filter(l => l.id !== payload.new.id)]);
+        } else if (payload.eventType === 'UPDATE') {
+          setLeads(prev => prev.map(l => l.id === payload.new.id ? (payload.new as Lead) : l));
+          if (selectedLead && selectedLead.id === payload.new.id) {
+            setSelectedLead(payload.new as Lead);
+          }
+        } else if (payload.eventType === 'DELETE') {
+          setLeads(prev => prev.filter(l => l.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedLead]);
+
+  // Load Leads from Supabase PostgreSQL (Sole Cloud Backend)
   const fetchData = async () => {
     try {
-      // 1. Instant hydration from localStorage if available
-      if (typeof window !== 'undefined' && leads.length === 0) {
-        const cachedLeads = localStorage.getItem('quadrace_crm_leads');
-        const cachedStats = localStorage.getItem('quadrace_crm_stats');
-        if (cachedLeads) {
-          try { setLeads(JSON.parse(cachedLeads)); } catch {}
-        }
-        if (cachedStats) {
-          try { setStats(JSON.parse(cachedStats)); } catch {}
-        }
-      }
-
       setLoading(true);
-      let leadsRes: Response;
-      let statsRes: Response;
 
-      try {
-        [leadsRes, statsRes] = await Promise.all([
+      // 1. Fetch from Supabase leads table
+      const sortColumn = sortBy === 'created_at' ? 'created_at' : (sortBy === 'company' ? 'company_name' : (sortBy === 'name' ? 'full_name' : 'score'));
+      const { data: dbLeads, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order(sortColumn, { ascending: sortOrder === 'asc' });
+
+      if (!error && dbLeads && dbLeads.length > 0) {
+        setLeads(dbLeads as Lead[]);
+        setIsSupabaseOnline(true);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('quadrace_crm_leads', JSON.stringify(dbLeads));
+        }
+      } else {
+        // Fallback / Initial Seed via Next.js API
+        const [leadsRes, statsRes] = await Promise.all([
           fetch(`${API_BASE}/api/leads?limit=200&sort_by=${sortBy}&order=${sortOrder}`, {
             headers: { 'x-org-id': 'org-demo-123' }
           }),
@@ -244,31 +304,16 @@ export default function LeadsPage() {
             headers: { 'x-org-id': 'org-demo-123' }
           })
         ]);
-      } catch {
-        // Fallback to local port 5000 if running
-        [leadsRes, statsRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/leads?limit=200&sort_by=${sortBy}&order=${sortOrder}`, {
-            headers: { 'x-org-id': 'org-demo-123' }
-          }),
-          fetch(`http://localhost:5000/api/leads/stats`, {
-            headers: { 'x-org-id': 'org-demo-123' }
-          })
-        ]);
-      }
-
-      const leadsData = await leadsRes.json();
-      const statsData = await statsRes.json();
-
-      if (leadsData.success && Array.isArray(leadsData.leads)) {
-        setLeads(leadsData.leads);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('quadrace_crm_leads', JSON.stringify(leadsData.leads));
+        const leadsData = await leadsRes.json();
+        const statsData = await statsRes.json();
+        if (leadsData.success && Array.isArray(leadsData.leads)) {
+          setLeads(leadsData.leads);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('quadrace_crm_leads', JSON.stringify(leadsData.leads));
+          }
         }
-      }
-      if (statsData.success) {
-        setStats(statsData);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('quadrace_crm_stats', JSON.stringify(statsData));
+        if (statsData.success) {
+          setStats(statsData);
         }
       }
     } catch (err) {
@@ -345,7 +390,7 @@ export default function LeadsPage() {
     return filteredLeads.slice(start, start + pageSize);
   }, [filteredLeads, currentPage, pageSize]);
 
-  // Open Lead Details Drawer & fetch activities
+  // Open Lead Details Drawer & fetch activities directly from Supabase
   const handleOpenLead = async (lead: Lead) => {
     setSelectedLead(lead);
     setEditForm({ ...lead });
@@ -365,31 +410,57 @@ export default function LeadsPage() {
     setDrawerTab('details');
 
     try {
-      const res = await fetch(`${API_BASE}/api/leads/${lead.id}/activities`);
-      const data = await res.json();
-      if (data.success) {
-        setActivityLogs(data.activities);
+      // 1. Fetch from Supabase lead_activity_logs
+      const { data: dbActivities, error } = await supabase
+        .from('lead_activity_logs')
+        .select('*')
+        .eq('lead_id', lead.id)
+        .order('created_at', { ascending: false });
+
+      if (!error && dbActivities && dbActivities.length > 0) {
+        setActivityLogs(dbActivities as LeadActivityLog[]);
+      } else {
+        // Fallback to local activities API
+        const res = await fetch(`${API_BASE}/api/leads/${lead.id}/activities`);
+        const data = await res.json();
+        if (data.success) {
+          setActivityLogs(data.activities);
+        }
       }
     } catch (err) {
       console.error('Failed to load activities:', err);
     }
   };
 
-  // Quick Stage Update
+  // Quick Stage Update directly in Supabase
   const handleStageChange = async (leadId: string, newStatus: string) => {
     try {
+      const performer = currentProfile?.full_name || currentUser?.email || 'Alex (Owner)';
+      
+      // 1. Direct Supabase Update
+      const { error: dbError } = await supabase
+        .from('leads')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', leadId);
+
+      if (!dbError) {
+        // Log stage change activity
+        await supabase.from('lead_activity_logs').insert({
+          lead_id: leadId,
+          org_id: 'org-demo-123',
+          type: 'status_change',
+          summary: `Pipeline stage moved to ${newStatus.replace('_', ' ').toUpperCase()}`,
+          performed_by: performer,
+        });
+      }
+
+      // Also update local state & fallback API
       let res = await fetch(`${API_BASE}/api/leads/${leadId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
-        body: JSON.stringify({ status: newStatus, performed_by: 'Pipeline Agent' })
+        body: JSON.stringify({ status: newStatus, performed_by: performer })
       });
-      if (!res.ok) {
-        res = await fetch(`http://localhost:5000/api/leads/${leadId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
-          body: JSON.stringify({ status: newStatus, performed_by: 'Pipeline Agent' })
-        });
-      }
+
       const data = await res.json();
       if (data.success && data.lead) {
         setLeads(prev => {
@@ -411,12 +482,14 @@ export default function LeadsPage() {
     }
   };
 
-  // Save manual field updates on lead
+  // Save manual field updates on lead directly to Supabase
   const handleSaveLeadEdit = async (e?: React.FormEvent | React.MouseEvent) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!selectedLead) return;
 
     setSavingEdit(true);
+    const performer = currentProfile?.full_name || currentUser?.email || 'Alex (Owner)';
+
     // Flatten, clean, and auto-format any phone numbers in each entry
     const consolidatedPhones = phoneList
       .flatMap(p => p.split(/[,;\n]+/))
@@ -434,27 +507,52 @@ export default function LeadsPage() {
       ...editForm,
       contact_number: consolidatedPhones,
       email: consolidatedEmails,
-      performed_by: 'Alex (Owner)'
+      performed_by: performer
     };
 
     try {
+      // 1. Direct Supabase Update
+      const { error: dbError } = await supabase
+        .from('leads')
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedLead.id);
+
+      // 2. Sync to API route fallback
       let res = await fetch(`${API_BASE}/api/leads/${selectedLead.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
+        headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123', 'x-user-name': performer },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) {
-        res = await fetch(`http://localhost:5000/api/leads/${selectedLead.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
-          body: JSON.stringify(payload)
-        });
-      }
       const data = await res.json();
+
       if (data.success && data.lead) {
         setSelectedLead(data.lead);
         setEditForm(data.lead);
         
+        // Log activities to Supabase if any
+        if (data.logged_changes && data.logged_changes.length > 0) {
+          data.logged_changes.forEach(async (act: any) => {
+            await supabase.from('lead_activity_logs').insert({
+              lead_id: selectedLead.id,
+              org_id: 'org-demo-123',
+              type: act.type || 'field_update',
+              field_name: act.field_name,
+              old_value: act.old_value,
+              new_value: act.new_value,
+              summary: act.summary,
+              content: act.content,
+              performed_by: performer,
+            });
+          });
+          setActivityLogs(prev => [...data.logged_changes, ...prev]);
+          showToast(`Saved! ${data.logged_changes.length} corrections stored in Supabase PostgreSQL.`);
+        } else {
+          showToast('Lead details updated in Supabase.');
+        }
+
         // Re-sync phone and email lists
         const newPhones = data.lead.contact_number 
           ? data.lead.contact_number.split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean)
@@ -471,13 +569,6 @@ export default function LeadsPage() {
           if (typeof window !== 'undefined') localStorage.setItem('quadrace_crm_leads', JSON.stringify(next));
           return next;
         });
-        
-        if (data.logged_changes && data.logged_changes.length > 0) {
-          setActivityLogs(prev => [...data.logged_changes, ...prev]);
-          showToast(`Saved! ${data.logged_changes.length} field corrections logged in audit timeline.`);
-        } else {
-          showToast('Lead details updated successfully.');
-        }
       } else {
         showToast(data.error || 'Failed to save lead updates.');
       }
@@ -782,16 +873,55 @@ export default function LeadsPage() {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Leads & Pipeline CRM</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Leads & Pipeline CRM</h1>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Supabase Cloud
+                </span>
+              </div>
               <p className="text-xs text-slate-500 font-medium">
-                CSV Lead Ingestion, Deduplication Engine, Field Correction Audit & Omnichannel Call/Email/WhatsApp Logging
+                Multi-User Cloud CRM powered by Supabase PostgreSQL with Realtime Sync & Audit Timeline
               </p>
             </div>
           </div>
         </div>
 
-        {/* Action Button Strip */}
+        {/* User Account & Action Button Strip */}
         <div className="flex items-center gap-2.5 flex-wrap">
+          {/* Supabase User Profile Pill */}
+          {currentUser ? (
+            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <div className="w-6 h-6 rounded-full bg-[#0F2B1D] text-[#C59B27] flex items-center justify-center font-bold text-[10px]">
+                {currentUser.email ? currentUser.email[0].toUpperCase() : 'U'}
+              </div>
+              <div className="text-left">
+                <div className="text-[11px] font-bold text-slate-900 leading-tight">
+                  {currentProfile?.full_name || currentUser.email.split('@')[0]}
+                </div>
+                <div className="text-[9px] font-bold text-[#C59B27] uppercase tracking-wider">
+                  {currentProfile?.role || 'User'}
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  localStorage.removeItem('quadrace_authenticated');
+                  window.location.href = '/login';
+                }}
+                className="p-1 text-slate-400 hover:text-red-600 rounded-lg transition ml-1"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <a
+              href="/login"
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+            >
+              <User className="w-3.5 h-3.5" /> Team Login
+            </a>
+          )}
           <button
             onClick={() => setIsImportModalOpen(true)}
             className="px-4 py-2.5 bg-[#0F2B1D] hover:bg-[#153B27] text-white rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2 transition border border-[#C59B27]"

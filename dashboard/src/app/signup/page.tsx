@@ -1,61 +1,101 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { QuadraceLogo } from '@/components/Logo';
-import { Lock, Mail, Building, ChevronRight } from 'lucide-react';
-
-const API_BASE = 'http://localhost:5000';
+import { Lock, Mail, Building, ChevronRight, User, Shield, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { supabase, UserRole } from '@/lib/supabase';
 
 function SignupForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
+  const [fullName, setFullName] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('Quadrace Pakistan');
-  const [email, setEmail] = useState<string>('alex@quadrace.pk');
-  const [password, setPassword] = useState<string>('••••••••••••');
-  const [selectedPlan, setSelectedPlan] = useState<string>('growth');
+  const [role, setRole] = useState<UserRole>('owner');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    const planParam = searchParams.get('plan');
-    if (planParam) {
-      setSelectedPlan(planParam);
-    }
-  }, [searchParams]);
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [successMsg, setSuccessMsg] = useState<string>('');
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
 
     try {
-      await fetch(`${API_BASE}/api/onboarding/setup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-org-id': 'org-demo-123' },
-        body: JSON.stringify({
-          company_name: companyName,
-          plan_tier: selectedPlan
-        })
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password,
+        options: {
+          data: {
+            full_name: fullName.trim() || 'Team Member',
+            company_name: companyName.trim(),
+            role: role,
+            org_id: 'org-demo-123',
+          }
+        }
       });
-    } catch (err) {
-      console.error(err);
+
+      if (error) {
+        setErrorMsg(error.message || 'Failed to create account.');
+        setLoading(false);
+        return;
+      }
+
+      if (data?.user) {
+        setSuccessMsg('Account created successfully in Supabase! Redirecting to Leads CRM...');
+        localStorage.setItem('quadrace_authenticated', 'true');
+        localStorage.setItem('quadrace_user_email', data.user.email || email);
+        localStorage.setItem('quadrace_user_id', data.user.id);
+        localStorage.setItem('quadrace_user_role', role);
+        localStorage.setItem('quadrace_user_name', fullName);
+
+        setTimeout(() => {
+          router.push('/leads');
+        }, 800);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'An error occurred during sign up.');
+      setLoading(false);
     }
-
-    localStorage.setItem('quadrace_authenticated', 'true');
-    localStorage.setItem('quadrace_org_name', companyName);
-    localStorage.setItem('quadrace_user_email', email);
-    localStorage.setItem('quadrace_show_onboarding_popup', 'true');
-
-    setTimeout(() => {
-      router.push('/inbox');
-    }, 600);
   };
 
   return (
     <form onSubmit={handleSignup} className="space-y-4">
+      {errorMsg && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-medium flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 font-bold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
       <div>
-        <label className="text-xs font-bold text-slate-800 block mb-1">Company / Business Name</label>
+        <label className="text-xs font-bold text-slate-800 block mb-1">Your Full Name</label>
+        <div className="relative">
+          <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <input
+            type="text"
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="e.g. Alex Rivera"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-bold text-slate-800 block mb-1">Company / Workspace Name</label>
         <div className="relative">
           <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
@@ -66,6 +106,23 @@ function SignupForm() {
             placeholder="e.g. Quadrace Pakistan"
             className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
           />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-xs font-bold text-slate-800 block mb-1">Select Your Team Role</label>
+        <div className="relative">
+          <Shield className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value as UserRole)}
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#0F2B1D] font-bold"
+          >
+            <option value="owner">Workspace Owner (Full Admin & Billing)</option>
+            <option value="admin">Operations Admin</option>
+            <option value="sales_rep">Sales Representative / Closer</option>
+            <option value="agent">Support & Pipeline Agent</option>
+          </select>
         </div>
       </div>
 
@@ -91,49 +148,21 @@ function SignupForm() {
           <input
             type="password"
             required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••••••"
+            placeholder="At least 6 characters"
             className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-[#0F2B1D]"
           />
-        </div>
-      </div>
-
-      {/* Plan Selection Grid */}
-      <div>
-        <label className="text-xs font-bold text-slate-800 block mb-2">Select Your Subscription Plan</label>
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { id: 'free', name: 'Free', price: '$0/mo' },
-            { id: 'starter', name: 'Starter', price: '$12/mo' },
-            { id: 'growth', name: 'Growth', price: '$25/mo' },
-            { id: 'plus', name: 'Plus', price: '$200/mo' }
-          ].map((p) => {
-            const isSelected = selectedPlan === p.id;
-            return (
-              <div
-                key={p.id}
-                onClick={() => setSelectedPlan(p.id)}
-                className={`p-3 rounded-xl border text-center cursor-pointer transition ${
-                  isSelected
-                    ? 'bg-[#0F2B1D] text-white border-[#C59B27] shadow-sm'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                <div className="text-xs font-bold">{p.name}</div>
-                <div className={`text-[10px] font-medium ${isSelected ? 'text-[#E6C280]' : 'text-slate-500'}`}>{p.price}</div>
-              </div>
-            );
-          })}
         </div>
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-[#0F2B1D] hover:bg-[#153B27] text-white font-extrabold text-xs rounded-xl shadow-md border border-[#C59B27] flex items-center justify-center gap-2 transition mt-2"
+        className="w-full py-3 bg-[#0F2B1D] hover:bg-[#153B27] text-white font-extrabold text-xs rounded-xl shadow-md border border-[#C59B27] flex items-center justify-center gap-2 transition disabled:opacity-50"
       >
-        {loading ? 'Creating Workspace...' : `Create Workspace on ${selectedPlan.toUpperCase()} Plan`}
+        {loading ? 'Creating Supabase Account...' : 'Register & Launch Workspace'}
         <ChevronRight className="w-4 h-4 text-[#C59B27]" />
       </button>
     </form>
@@ -142,25 +171,25 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4">
-      <div className="w-full max-w-lg bg-white p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
+    <div className="min-h-[85vh] flex items-center justify-center py-12 px-4 bg-slate-50">
+      <div className="w-full max-w-md bg-white p-8 rounded-3xl border border-slate-200 shadow-xl space-y-6">
         
         <div className="text-center space-y-2">
           <div className="flex justify-center mb-2">
             <QuadraceLogo />
           </div>
-          <h2 className="text-xl font-bold text-slate-900">Create Your Workspace</h2>
-          <p className="text-xs text-slate-500 font-medium">Set up your business organization and select your Solomon AI subscription plan.</p>
+          <h2 className="text-xl font-black text-slate-900">Create Multi-User Account</h2>
+          <p className="text-xs text-slate-500 font-medium">Join your team's live Supabase PostgreSQL CRM.</p>
         </div>
 
-        <Suspense fallback={<div className="text-xs text-center text-slate-400">Loading signup portal...</div>}>
+        <Suspense fallback={<div className="text-xs text-center py-4">Loading form...</div>}>
           <SignupForm />
         </Suspense>
 
         <div className="pt-4 border-t border-slate-100 text-center text-xs text-slate-500">
-          Already have an active workspace?{' '}
+          Already have an account?{' '}
           <Link href="/login" className="font-bold text-[#0F2B1D] hover:underline">
-            Log In
+            Log In to Workspace
           </Link>
         </div>
 
